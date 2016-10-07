@@ -1,0 +1,39 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>icons/left_arrow.png</file>
+        <file>icons/right_arrow.png</file>
+        <file>icons/star_fav.png</file>
+        <file>icons/star.png</file>
+        <file>icons/about_fav.png</file>
+        <file>icons/about.png</file>
+        <file>icons/database_fav.png</file>
+        <file>icons/database.png</file>
+        <file>icons/event_fav.png</file>
+        <file>icons/event.png</file>
+        <file>icons/person_fav.png</file>
+        <file>icons/person.png</file>
+        <file>icons/logo.png</file>
+        <file>icons/add_event.png</file>
+        <file>icons/add_person.png</file>
+        <file>icons/remove_event.png</file>
+        <file>icons/remove_person.png</file>
+        <file>icons/save_all.png</file>
+        <file>icons/save_as.png</file>
+        <file>icons/save.png</file>
+        <file>icons/export_database.png</file>
+        <file>icons/import_database.png</file>
+        <file>icons/new_database.png</file>
+        <file>icons/open_database.png</file>
+        <file>icons/open_event.png</file>
+        <file>icons/open_person.png</file>
+        <file>icons/lgplv3.png</file>
+        <file>icons/search_fav.png</file>
+        <file>icons/search.png</file>
+        <file>icons/remove.png</file>
+        <file>icons/mail.png</file>
+        <file>icons/add.png</file>
+        <file>icons/ok.png</file>
+        <file>icons/cancel.png</file>
+        <file>icons/family.png</file>
+    </qresource>
+</RCC>
