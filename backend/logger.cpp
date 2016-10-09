@@ -5,7 +5,7 @@
 #include <deque>
 #include <algorithm>
 
-Logger::Logger() : _file("logs/" + QDate::currentDate().toString("yyyyMMdd") + ".log")
+Logger::Logger() : _file("logs/" + QDate::currentDate().toString("yyyy_MM_dd") + ".log")
 {
     if(!QDir("logs").exists())
     {
@@ -16,7 +16,7 @@ Logger::Logger() : _file("logs/" + QDate::currentDate().toString("yyyyMMdd") + "
     std::deque<QDate> valid_logs;
     for(int i=0; i<files.length(); ++i)
     {
-        QDate a = QDate::fromString(QFileInfo(files[i]).baseName(),"yyyyMMdd");
+        QDate a = QDate::fromString(QFileInfo(files[i]).baseName(),"yyyy_MM_dd");
         if(a != QDate())
         {
             valid_logs.emplace_back(a);
@@ -29,7 +29,7 @@ Logger::Logger() : _file("logs/" + QDate::currentDate().toString("yyyyMMdd") + "
         {
             if(valid_logs[0]!=QDate::currentDate())
             {
-                QFile::remove("logs/" + valid_logs[0].toString("yyyyMMdd") + ".log");
+                QFile::remove("logs/" + valid_logs[0].toString("yyyy_MM_dd") + ".log");
             }
             valid_logs.pop_front();
         }
@@ -50,8 +50,8 @@ void Logger::initiate()
     _file.flush();
 }
 
-void Logger::log(QString message)
+void Logger::log(const QString &message)
 {
-    _file.write((QTime::currentTime().toString("HH.mm:ss") + ": " + message + "\r\n").toUtf8());
+    _file.write((QTime::currentTime().toString("HH.mm:ss") + ": " + message + "\r\n").toStdString().c_str());
     _file.flush();
 }

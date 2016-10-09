@@ -29,6 +29,7 @@ void MainWidget::new_person(PersonEntity p)
     PersonWidget* person = new PersonWidget(p);
     connect(person, SIGNAL(base_text(QString)), this, SLOT(change_text(QString)));
     ui->main_widget->addTab(person, "Nova oseba");
+    ui->main_widget->setCurrentWidget(person);
 }
 
 void MainWidget::new_event(EventEntity e)
@@ -36,12 +37,14 @@ void MainWidget::new_event(EventEntity e)
     EventWidget* event = new EventWidget(e);
     connect(event, SIGNAL(base_text(QString)), this, SLOT(change_text(QString)));
     ui->main_widget->addTab(event, "Nov dogodek");
+    ui->main_widget->setCurrentWidget(event);
 }
 
 void MainWidget::new_mail_filter()
 {
     MailFilter* mail_filter = new MailFilter();
     ui->main_widget->addTab(mail_filter, "Mail filter");
+    ui->main_widget->setCurrentWidget(mail_filter);
 }
 
 void MainWidget::change_text(QString val)
@@ -72,6 +75,7 @@ void MainWidget::open_person(const PersonEntity& p)
     PersonWidget* person = new PersonWidget(p);
     connect(person, SIGNAL(base_text(QString)), this, SLOT(change_text(QString)));
     ui->main_widget->addTab(person, p.name() + " " + p.surname());
+    ui->main_widget->setCurrentWidget(person);
 }
 
 void MainWidget::open_event(const EventEntity& e)
@@ -79,4 +83,5 @@ void MainWidget::open_event(const EventEntity& e)
     EventWidget* event = new EventWidget(e);
     connect(event, SIGNAL(base_text(QString)), this, SLOT(change_text(QString)));
     ui->main_widget->addTab(event, e.name() + " " + e.type());
+    ui->main_widget->setCurrentWidget(event);
 }

@@ -30,7 +30,7 @@ public:
 
     [val]: value
     */
-    void event_setting(bool val);
+    void event_setting(const bool val);
 
     /*
     #### get event setting visibility
@@ -58,7 +58,7 @@ public:
 
     [val]: value
     */
-    void fullscreen(bool val);
+    void fullscreen(const bool val);
 
     /*
     #### get full screen
@@ -72,7 +72,7 @@ public:
 
     [val]: value
     */
-    void import_database(bool val);
+    void import_database(const bool val);
 
     /*
     #### get import database setting visibility
@@ -86,7 +86,7 @@ public:
 
     [val]: value
     */
-    void new_database(bool val);
+    void new_database(const bool val);
 
     /*
     #### get new database setting visibility
@@ -100,7 +100,7 @@ public:
 
     [val]: value
     */
-    void person_settings(bool val);
+    void person_settings(const bool val);
 
     /*
     #### get person setting visibility
@@ -114,7 +114,7 @@ public:
 
     [val]: value
     */
-    void save_widget(bool val);
+    void save_widget(const bool val);
 
     /*
     #### get save setting visibility
@@ -128,7 +128,7 @@ public:
 
     [val]: value
     */
-    void settings_visible(bool val);
+    void settings_visible(const bool val);
 
     /*
     #### get setting visibility
@@ -142,7 +142,7 @@ public:
 
     [val]: value
     */
-    void position(QPoint val);
+    void position(const QPoint& val);
 
     /*
     #### get window position
@@ -156,7 +156,7 @@ public:
 
     [val]: value
     */
-    void size(QSize val);
+    void size(const QSize &val);
 
     /*
     #### get window size
@@ -164,6 +164,21 @@ public:
     [returns]: value
     */
     QSize size();
+
+    /*
+    #### set last path
+
+    [val]: value
+    */
+    void last_path(const QString& val);
+
+    /*
+    #### get window size
+
+    [returns]: value
+    */
+    QString last_path();
+
 
 
 

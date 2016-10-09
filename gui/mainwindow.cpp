@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 
 #include <QShortcut>
+#include <QFileDialog>
 
 #include "dialogs/openpersondialog.hpp"
 #include "dialogs/openeventdialog.hpp"
@@ -22,8 +23,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->settings, SIGNAL(new_person()), ui->main_widget, SLOT(new_person()));
     connect(ui->settings, SIGNAL(new_event()), ui->main_widget, SLOT(new_event()));
     connect(ui->settings, SIGNAL(new_mail_filter()), ui->main_widget, SLOT(new_mail_filter()));
-    connect(ui->settings, SIGNAL(new_database(QString)), this, SLOT(new_or_open_db(QString)));
-    connect(ui->settings, SIGNAL(open_database(QString)), this, SLOT(new_or_open_db(QString)));
+    connect(ui->settings, SIGNAL(new_database()), this, SLOT(new_database()));
+    connect(ui->settings, SIGNAL(open_database()), this, SLOT(open_database()));
     connect(ui->settings, SIGNAL(open_person()), this, SLOT(emit_open_person()));
     connect(ui->settings, SIGNAL(open_event()), this, SLOT(emit_open_event()));
     connect(this, SIGNAL(open_person(PersonEntity)), ui->main_widget, SLOT(open_person(PersonEntity)));
@@ -64,21 +65,62 @@ void MainWindow::save_settings()
     _config.fullscreen(isFullScreen());
 
     ui->settings->save_favourites(_config);
+
 }
 
-void MainWindow::new_or_open_db(QString path)
+void MainWindow::new_database()
 {
-    try
+    QFileDialog f(this);
+    f.setNameFilter("*.db");
+    f.setAcceptMode(QFileDialog::AcceptSave);
+    f.setViewMode(QFileDialog::Detail);
+    f.setFileMode(QFileDialog::AnyFile);
+    f.setDirectory(_config.last_path());
+    if(f.exec())
     {
-        _connected &= false;
-        _db.reset(new Database(path, _logger));
-        _connected |= true;
-        ui->bottom_bar->display("Povezan z bazo " + QFileInfo(path).fileName() +"!", false);
+        QString path = f.selectedFiles()[0];
+        if(!path.endsWith(".db")) path.append(".db");
+        try
+        {
+            _connected &= false;
+            _db.reset(new Database(path, _logger));
+            _config.last_path(_db->folder());
+            _connected |= true;
+            ui->bottom_bar->display("Povezan z bazo " + QFileInfo(path).fileName() +"!", false);
+        }
+        catch(const std::exception&)
+        {
+            ui->bottom_bar->display("Napaka pri povezavi na bazo " + QFileInfo(path).fileName() +"!", true);
+            _connected &= false;
+        }
     }
-    catch(const std::exception&)
+}
+
+void MainWindow::open_database()
+{
+    QFileDialog f(this);
+    f.setNameFilter("*.db");
+    f.setAcceptMode(QFileDialog::AcceptOpen);
+    f.setViewMode(QFileDialog::Detail);
+    f.setFileMode(QFileDialog::ExistingFile);
+    f.setDirectory(_config.last_path());
+    if(f.exec())
     {
-        ui->bottom_bar->display("Napaka pri povezavi na bazo " + QFileInfo(path).fileName() +"!", true);
-        _connected &= false;
+        QString path = f.selectedFiles()[0];
+        if(!path.endsWith(".db")) path.append(".db");
+        try
+        {
+            _connected &= false;
+            _db.reset(new Database(path, _logger));
+            _config.last_path(_db->folder());
+            _connected |= true;
+            ui->bottom_bar->display("Povezan z bazo " + QFileInfo(path).fileName() +"!", false);
+        }
+        catch(const std::exception&)
+        {
+            ui->bottom_bar->display("Napaka pri povezavi na bazo " + QFileInfo(path).fileName() +"!", true);
+            _connected &= false;
+        }
     }
 }
 

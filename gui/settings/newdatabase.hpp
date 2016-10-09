@@ -16,8 +16,8 @@ public:
     ~NewDatabase();
 
 signals:
-    void new_database(QString);
-    void open_database(QString);
+    void new_database();
+    void open_database();
 
 private slots:
     void on_new_database_button_clicked();

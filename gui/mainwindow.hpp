@@ -28,7 +28,8 @@ signals:
 private slots:
     void save_settings();
     void restore();
-    void new_or_open_db(QString path);
+    void new_database();
+    void open_database();
     void save();
     void save_as();
     void save_all();

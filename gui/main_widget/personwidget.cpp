@@ -126,12 +126,13 @@ void PersonWidget::save(std::shared_ptr<Database> db)
     }
     else
     {
-        if(db->save_person(p))
+        try
         {
+            db->save_person(p);
             MessageDialog message("Podatki o osebi uspešno posodobljeni!");
             message.exec();
         }
-        else
+        catch(std::logic_error&)
         {
             MessageDialog message("Napaka pri shranjevanju, oseba ni shranjena! Preverite, če je baza odprta v drugem programu!", "Napaka pri shranjevanju");
             message.exec();

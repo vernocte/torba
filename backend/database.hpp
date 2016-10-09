@@ -16,6 +16,7 @@ private:
 
     QSqlDatabase _db;
     std::shared_ptr<Logger> _logger;
+    QString _folder;
 
     void create_database();
 
@@ -25,19 +26,21 @@ public:
 
     ~Database();
 
-    bool save_person(PersonEntity p);
+    void save_person(PersonEntity p);
     PersonEntity get_person(int idx);
     int insert_person(PersonEntity p);
     std::vector<PersonBaseEntity> person_list();
     void delete_person(int idx);
 
-    bool save_event(EventEntity e);
+    void save_event(EventEntity e);
     EventEntity get_event(int idx);
     int insert_event(EventEntity e);
     std::vector<EventBaseEntity> event_list();
     void delete_event(int idx);
 
     void insert_role(QString val);
+
+    QString folder();
 };
 
 #endif // DATABASE_HPP

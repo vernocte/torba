@@ -43,30 +43,10 @@ NewDatabase::~NewDatabase()
 
 void NewDatabase::on_new_database_button_clicked()
 {
-    QFileDialog f(this);
-    f.setNameFilter("*.db");
-    f.setAcceptMode(QFileDialog::AcceptSave);
-    f.setViewMode(QFileDialog::Detail);
-    f.setFileMode(QFileDialog::AnyFile);
-    if(f.exec())
-    {
-        QString path = f.selectedFiles()[0];
-        if(!path.endsWith(".db")) path.append(".db");
-        emit new_database(path);
-    }
+    emit new_database();
 }
 
 void NewDatabase::on_open_database_button_clicked()
 {
-    QFileDialog f(this);
-    f.setNameFilter("*.db");
-    f.setAcceptMode(QFileDialog::AcceptOpen);
-    f.setViewMode(QFileDialog::Detail);
-    f.setFileMode(QFileDialog::ExistingFile);
-    if(f.exec())
-    {
-        QString path = f.selectedFiles()[0];
-        if(!path.endsWith(".db")) path.append(".db");
-        emit open_database(path);
-    }
+    emit open_database();
 }

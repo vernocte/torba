@@ -99,12 +99,13 @@ void EventWidget::save(std::shared_ptr<Database> db)
     }
     else
     {
-        if(db->save_event(e))
+        try
         {
+            db->save_event(e);
             MessageDialog message("Podatki o dogodku uspešno posodobljeni!");
             message.exec();
         }
-        else
+        catch(std::logic_error&)
         {
             MessageDialog message("Napaka pri shranjevanju, dogodek ni shranjen! Preverite, če je baza odprta v drugem programu!", "Napaka pri shranjevanju");
             message.exec();

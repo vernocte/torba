@@ -2,6 +2,8 @@
 #define LOGGER_HPP
 
 #include <QFile>
+#include <QString>
+#include <string>
 
 class Logger
 {
@@ -13,7 +15,7 @@ private:
 public:
     explicit Logger();
     virtual ~Logger();
-    void log(QString message);
+    void log(const QString &message);
 };
 
 #endif // LOGGER_HPP

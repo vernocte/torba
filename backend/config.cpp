@@ -14,7 +14,7 @@ Config::Config() : _data("Vernocte laboratories", "DB manager") { }
 
 [val]: value
 */
-void Config::event_setting(bool val)
+void Config::event_setting(const bool val)
 {
     _data.setValue("event_setting", val);
 }
@@ -34,7 +34,7 @@ bool Config::event_setting()
 
 [val]: value
 */
-void Config::find_mail(bool val)
+void Config::find_mail(const bool val)
 {
     _data.setValue("find_mail", val);
 }
@@ -54,7 +54,7 @@ bool Config::find_mail()
 
 [val]: value
 */
-void Config::fullscreen(bool val)
+void Config::fullscreen(const bool val)
 {
     _data.setValue("fullscreen", val);
 }
@@ -74,7 +74,7 @@ bool Config::fullscreen()
 
 [val]: value
 */
-void Config::import_database(bool val)
+void Config::import_database(const bool val)
 {
     _data.setValue("import_database", val);
 }
@@ -94,7 +94,7 @@ bool Config::import_database()
 
 [val]: value
 */
-void Config::new_database(bool val)
+void Config::new_database(const bool val)
 {
     _data.setValue("new_database", val);
 }
@@ -114,7 +114,7 @@ bool Config::new_database()
 
 [val]: value
 */
-void Config::person_settings(bool val)
+void Config::person_settings(const bool val)
 {
     _data.setValue("person_settings", val);
 }
@@ -134,7 +134,7 @@ bool Config::person_settings()
 
 [val]: value
 */
-void Config::save_widget(bool val)
+void Config::save_widget(const bool val)
 {
     _data.setValue("save_widget", val);
 }
@@ -154,7 +154,7 @@ bool Config::save_widget()
 
 [val]: value
 */
-void Config::settings_visible(bool val)
+void Config::settings_visible(const bool val)
 {
     _data.setValue("settings_visible", val);
 }
@@ -174,7 +174,7 @@ bool Config::settings_visible()
 
 [val]: value
 */
-void Config::position(QPoint val)
+void Config::position(const QPoint& val)
 {
     _data.setValue("position", val);
 }
@@ -194,7 +194,7 @@ QPoint Config::position()
 
 [val]: value
 */
-void Config::size(QSize val)
+void Config::size(const QSize& val)
 {
     _data.setValue("size", val);
 }
@@ -207,4 +207,24 @@ void Config::size(QSize val)
 QSize Config::size()
 {
     return _data.value("size").value<QSize>();
+}
+
+/*
+#### set last path
+
+[val]: value
+*/
+void Config::last_path(const QString& val)
+{
+    _data.setValue("last path", val);
+}
+
+/*
+#### get window size
+
+[returns]: value
+*/
+QString Config::last_path()
+{
+    return _data.value("last path").value<QString>();
 }

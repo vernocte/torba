@@ -63,11 +63,11 @@ Settings::Settings(QWidget *parent) :
     connect(ui->find_mail, SIGNAL(new_mail_filter()), this, SLOT(emit_new_mail_filter()));
     connect(ui->find_mail_fav, SIGNAL(new_mail_filter()), this, SLOT(emit_new_mail_filter()));
 
-    connect(ui->new_database, SIGNAL(new_database(QString)), this, SLOT(emit_new_database(QString)));
-    connect(ui->new_database_fav, SIGNAL(new_database(QString)), this, SLOT(emit_new_database(QString)));
+    connect(ui->new_database, SIGNAL(new_database()), this, SLOT(emit_new_database()));
+    connect(ui->new_database_fav, SIGNAL(new_database()), this, SLOT(emit_new_database()));
 
-    connect(ui->new_database, SIGNAL(open_database(QString)), this, SLOT(emit_open_database(QString)));
-    connect(ui->new_database_fav, SIGNAL(open_database(QString)), this, SLOT(emit_open_database(QString)));
+    connect(ui->new_database, SIGNAL(open_database()), this, SLOT(emit_open_database()));
+    connect(ui->new_database_fav, SIGNAL(open_database()), this, SLOT(emit_open_database()));
 
     connect(ui->save_widget_person, SIGNAL(save_file()), this, SLOT(emit_save_file()));
     connect(ui->save_widget_event, SIGNAL(save_file()), this, SLOT(emit_save_file()));
@@ -129,14 +129,14 @@ void Settings::emit_new_mail_filter()
     emit new_mail_filter();
 }
 
-void Settings::emit_new_database(QString val)
+void Settings::emit_new_database()
 {
-    emit new_database(val);
+    emit new_database();
 }
 
-void Settings::emit_open_database(QString val)
+void Settings::emit_open_database()
 {
-    emit open_database(val);
+    emit open_database();
 }
 
 void Settings::emit_open_person()
