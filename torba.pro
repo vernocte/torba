@@ -36,7 +36,8 @@ SOURCES += main.cpp\
     backend/entities/personentity.cpp \
     backend/entities/eventbaseentity.cpp \
     backend/entities/evententity.cpp \
-    backend/logger.cpp
+    backend/logger.cpp \
+    gui/dialogs/messagedialog.cpp
 
 HEADERS  += \
     gui/mainwindow.hpp \
@@ -62,7 +63,8 @@ HEADERS  += \
     backend/entities/evententity.hpp \
     backend/entities/personentity.hpp \
     backend/entities/eventbaseentity.hpp \
-    backend/logger.hpp
+    backend/logger.hpp \
+    gui/dialogs/messagedialog.hpp
 
 FORMS    += gui/mainwindow.ui \
     gui/main_widget/mainwidget.ui \
@@ -73,7 +75,11 @@ FORMS    += gui/mainwindow.ui \
     gui/settings/settingswidgetbase.ui \
     gui/bottom_bar/bottombar.ui \
     gui/dialogs/openpersondialog.ui \
-    gui/dialogs/openeventdialog.ui
+    gui/dialogs/openeventdialog.ui \
+    gui/dialogs/messagedialog.ui
 
 RESOURCES += \
     resources/resources.qrc
+
+DISTFILES += \
+    README.md

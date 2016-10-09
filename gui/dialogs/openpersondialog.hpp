@@ -1,8 +1,10 @@
 #ifndef OPENPERSONDIALOG_HPP
 #define OPENPERSONDIALOG_HPP
 
-#include <QDialog>
 #include <vector>
+#include <memory>
+
+#include <QDialog>
 
 #include "../../backend/entities/personbaseentity.hpp"
 #include "../../backend/entities/personentity.hpp"
@@ -17,7 +19,7 @@ class OpenPersonDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit OpenPersonDialog(Database &db, QWidget *parent = 0);
+    explicit OpenPersonDialog(std::shared_ptr<Database> &db, QWidget *parent = 0);
     ~OpenPersonDialog();
 
 public slots:
@@ -34,7 +36,7 @@ private slots:
 private:
     Ui::OpenPersonDialog *ui;
     std::vector<PersonBaseEntity> _val;
-    Database& _db;
+    std::shared_ptr<Database> _db;
     QStringList _persons;
 };
 

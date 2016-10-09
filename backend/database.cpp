@@ -1,21 +1,18 @@
 #include "database.hpp"
 
-#include <QDebug>
-
-Database::Database()
-{
-    _db = QSqlDatabase::addDatabase("QSQLITE");
-}
-
-Database::Database(QString path)
+Database::Database(QString path, std::shared_ptr<Logger> &logger) : _logger(logger)
 {
     _db = QSqlDatabase::database();
     bool create = !QFileInfo(path).exists();
     _db.setDatabaseName(path);
+    _db.open();
     if(create)
     {
         create_database();
+        _logger->log("Database " + path + " successfuly created");
     }
+
+    _logger->log("Database " + path + " successfuly opened");
 }
 
 Database::~Database()
@@ -24,11 +21,11 @@ Database::~Database()
 
     // because, reasons
     _db = QSqlDatabase();
+    _logger->log("Database closed");
 }
 
 void Database::create_database()
 {
-    if(!_db.open()) throw;
     QSqlQuery query;
 
     // create tables

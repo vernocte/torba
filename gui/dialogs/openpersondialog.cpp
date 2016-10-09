@@ -3,11 +3,11 @@
 
 #include <QRegExp>
 
-OpenPersonDialog::OpenPersonDialog(Database &db, QWidget *parent) :
+OpenPersonDialog::OpenPersonDialog(std::shared_ptr<Database> &db, QWidget *parent) :
     QDialog(parent), ui(new Ui::OpenPersonDialog), _db(db), _persons()
 {
     ui->setupUi(this);
-    _val = _db.person_list();
+    _val = _db->person_list();
     for(uint i=0; i<_val.size(); ++i)
     {
         _persons.append(QString::number(_val[i].idx()) + " " + _val[i].name() + " " + _val[i].surname());
@@ -36,7 +36,7 @@ std::vector<PersonEntity> OpenPersonDialog::person()
     std::vector<PersonEntity> res(len);
     for(int i=0; i<len; ++i)
     {
-        res[i] = _db.get_person(std::stoi(ui->person_list->selectedItems()[i]->text().toStdString()));
+        res[i] = _db->get_person(std::stoi(ui->person_list->selectedItems()[i]->text().toStdString()));
     }
     return res;
 }

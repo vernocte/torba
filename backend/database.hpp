@@ -4,18 +4,27 @@
 #include <QtSql>
 #include <QString>
 
-#include "../backend/entities/personentity.hpp"
-#include "../backend/entities/evententity.hpp"
+#include "entities/personentity.hpp"
+#include "entities/evententity.hpp"
+#include "logger.hpp"
+
+#include<memory>
 
 class Database
 {
 private:
+
     QSqlDatabase _db;
+    std::shared_ptr<Logger> _logger;
+
     void create_database();
+
 public:
-    Database(QString path);
-    Database();
+
+    Database(QString path, std::shared_ptr<Logger> &logger);
+
     ~Database();
+
     bool save_person(PersonEntity p);
     PersonEntity get_person(int idx);
     int insert_person(PersonEntity p);

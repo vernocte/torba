@@ -1,7 +1,10 @@
 #ifndef MAINWINDOW_HPP
 #define MAINWINDOW_HPP
 
+#include<memory>
+
 #include <QMainWindow>
+
 #include "backend/config.hpp"
 #include "backend/database.hpp"
 #include "backend/logger.hpp"
@@ -35,10 +38,13 @@ private slots:
     void delete_event();
 
 private:
+
     Ui::MainWindow *ui;
     Config _config;
-    Database _db;
     bool _connected;
+
+    std::shared_ptr<Logger> _logger;
+    std::shared_ptr<Database> _db;
 };
 
 #endif // MAINWINDOW_HPP

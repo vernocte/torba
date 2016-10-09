@@ -1,7 +1,7 @@
 #include "personwidget.hpp"
 #include "ui_personwidget.h"
 
-#include <QMessageBox>
+#include "../dialogs/messagedialog.hpp"
 
 PersonWidget::PersonWidget(PersonEntity p, QWidget *parent) :
     EditorBase(parent),
@@ -82,20 +82,16 @@ void PersonWidget::on_name_edit_textChanged(const QString)
     emit base_text(text);
 }
 
-void PersonWidget::save_as(Database& db)
+void PersonWidget::save_as(std::shared_ptr<Database> db)
 {
     if(ui->name_edit->text()=="" || ui->surname_edit->text()=="") return;
-    QMessageBox message;
-    message.setText("Oseba bo shranjena pod novo številko, spremembe na originalni osebi ne bodo shranjene!");
-    message.setStyleSheet("QMessageBox { color: white; background-color: rgb(80,80,80); }"
-                          "QMessageBox QLabel { color: white; }"
-                          "QMessageBox QPushButton { background-color: rgb(60,60,60); border: none; outline: none; padding:12px;}");
+    MessageDialog message("Oseba bo shranjena pod novo številko, spremembe na originalni osebi ne bodo shranjene!");
     message.exec();
     ui->number_label->setText(0);
     save(db);
 }
 
-void PersonWidget::save(Database& db)
+void PersonWidget::save(std::shared_ptr<Database> db)
 {
     if(ui->name_edit->text()=="" || ui->surname_edit->text()=="") return;
     PersonEntity p;
@@ -116,44 +112,28 @@ void PersonWidget::save(Database& db)
 
     if(p.idx()==0)
     {
-        ui->number_label->setText(QString::number(db.insert_person(p)));
+        ui->number_label->setText(QString::number(db->insert_person(p)));
         if(ui->number_label->text().toInt()==0)
         {
-            QMessageBox message;
-            message.setText("Napaka pri shranjevanju, oseba ni shranjena! Preverite, če je baza odprta v drugem programu!");
-            message.setStyleSheet("QMessageBox { color: white; background-color: rgb(80,80,80); }"
-                                  "QMessageBox QLabel { color: white; }"
-                                  "QMessageBox QPushButton { background-color: rgb(60,60,60); border: none; outline: none; padding:6px; }");
+            MessageDialog message("Napaka pri shranjevanju, oseba ni shranjena! Preverite, če je baza odprta v drugem programu!", "Napaka pri shranjevanju");
             message.exec();
         }
         else
         {
-            QMessageBox message;
-            message.setText("Oseba uspešno shranjena!");
-            message.setStyleSheet("QMessageBox { color: white; background-color: rgb(80,80,80); }"
-                                  "QMessageBox QLabel { color: white; }"
-                                  "QMessageBox QPushButton { background-color: rgb(60,60,60); border: none; outline: none; padding:6px; }");
+            MessageDialog message("Oseba uspešno shranjena!");
             message.exec();
         }
     }
     else
     {
-        if(db.save_person(p))
+        if(db->save_person(p))
         {
-            QMessageBox message;
-            message.setText("Podatki o osebi uspešno posodobljeni!");
-            message.setStyleSheet("QMessageBox { color: white; background-color: rgb(80,80,80); }"
-                                  "QMessageBox QLabel { color: white; }"
-                                  "QMessageBox QPushButton { background-color: rgb(60,60,60); border: none; outline: none; padding:6px; }");
+            MessageDialog message("Podatki o osebi uspešno posodobljeni!");
             message.exec();
         }
         else
         {
-            QMessageBox message;
-            message.setText("Napaka pri shranjevanju, oseba ni shranjena! Preverite, če je baza odprta v drugem programu!");
-            message.setStyleSheet("QMessageBox { color: white; background-color: rgb(80,80,80); }"
-                                  "QMessageBox QLabel { color: white; }"
-                                  "QMessageBox QPushButton { background-color: rgb(60,60,60); border: none; outline: none; padding:6px; }");
+            MessageDialog message("Napaka pri shranjevanju, oseba ni shranjena! Preverite, če je baza odprta v drugem programu!", "Napaka pri shranjevanju");
             message.exec();
         }
     }

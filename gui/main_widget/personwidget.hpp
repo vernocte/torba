@@ -17,8 +17,8 @@ class PersonWidget : public EditorBase
 public:
     explicit PersonWidget(PersonEntity p = PersonEntity(), QWidget *parent = 0);
     ~PersonWidget();
-    void save(Database& db) override;
-    void save_as(Database& db) override;
+    void save(std::shared_ptr<Database> db) override;
+    void save_as(std::shared_ptr<Database> db) override;
 
 private slots:
     void on_surname_edit_textChanged(const QString);

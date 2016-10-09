@@ -15,8 +15,8 @@ class MailFilter : public EditorBase
 public:
     explicit MailFilter(QWidget *parent = 0);
     ~MailFilter();
-    void save(Database&) override;
-    void save_as(Database&) override;
+    void save(std::shared_ptr<Database>) override;
+    void save_as(std::shared_ptr<Database>) override;
 
 private:
     Ui::MailFilter *ui;

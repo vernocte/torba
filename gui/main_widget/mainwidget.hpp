@@ -1,7 +1,10 @@
 #ifndef MAINWIDGET_HPP
 #define MAINWIDGET_HPP
 
+#include <memory>
+
 #include <QWidget>
+
 #include "../../backend/entities/personentity.hpp"
 #include "../../backend/entities/evententity.hpp"
 #include "../../backend/database.hpp"
@@ -23,11 +26,11 @@ public slots:
    void new_person(PersonEntity p = PersonEntity());
    void new_event(EventEntity e = EventEntity());
    void new_mail_filter();
-   void save(Database &db);
-   void save_as(Database &db);
-   void save_all(Database &db);
-   void open_person(PersonEntity p);
-   void open_event(EventEntity e);
+   void save(std::shared_ptr<Database> &db);
+   void save_as(std::shared_ptr<Database> &db);
+   void save_all(std::shared_ptr<Database> &db);
+   void open_person(const PersonEntity& p);
+   void open_event(const EventEntity& e);
 
 private slots:
     void close_file(int index);

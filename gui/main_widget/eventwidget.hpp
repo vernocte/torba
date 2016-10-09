@@ -17,8 +17,8 @@ class EventWidget : public EditorBase
 public:
     explicit EventWidget(EventEntity e = EventEntity(), QWidget *parent = 0);
     ~EventWidget();
-    void save(Database& db) override;
-    void save_as(Database& db) override;
+    void save(std::shared_ptr<Database> db) override;
+    void save_as(std::shared_ptr<Database> db) override;
 
 private slots:
     void on_name_edit_textChanged(const QString);

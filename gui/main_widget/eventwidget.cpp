@@ -1,7 +1,7 @@
 #include "eventwidget.hpp"
 #include "ui_eventwidget.h"
 
-#include <QMessageBox>
+#include "../dialogs/messagedialog.hpp"
 
 EventWidget::EventWidget(EventEntity e, QWidget *parent) :
     EditorBase(parent),
@@ -73,7 +73,7 @@ void EventWidget::on_type_edit_textChanged(const QString)
     emit base_text(text);
 }
 
-void EventWidget::save(Database &db)
+void EventWidget::save(std::shared_ptr<Database> db)
 {
     if(ui->name_edit->text() == "" || ui->type_edit->text() == "") return;
     EventEntity e;
@@ -85,57 +85,37 @@ void EventWidget::save(Database &db)
 
     if(e.idx()==0)
     {
-        ui->number_label->setText(QString::number(db.insert_event(e)));
+        ui->number_label->setText(QString::number(db->insert_event(e)));
         if(ui->number_label->text().toInt()==0)
         {
-            QMessageBox message;
-            message.setText("Napaka pri shranjevanju, dogodek ni shranjen! Preverite, če je baza odprta v drugem programu!");
-            message.setStyleSheet("QMessageBox { color: white; background-color: rgb(80,80,80); }"
-                                  "QMessageBox QLabel { color: white; }"
-                                  "QMessageBox QPushButton { background-color: rgb(60,60,60); border: none; outline: none; padding:6px; }");
+            MessageDialog message("Napaka pri shranjevanju, dogodek ni shranjen! Preverite, če je baza odprta v drugem programu!", "Napaka pri shranjevanju");
             message.exec();
         }
         else
         {
-            QMessageBox message;
-            message.setText("Dogodek uspešno shranjen!");
-            message.setStyleSheet("QMessageBox { color: white; background-color: rgb(80,80,80); }"
-                                  "QMessageBox QLabel { color: white; }"
-                                  "QMessageBox QPushButton { background-color: rgb(60,60,60); border: none; outline: none; padding:6px; }");
+            MessageDialog message("Dogodek uspešno shranjen!");
             message.exec();
         }
     }
     else
     {
-        if(db.save_event(e))
+        if(db->save_event(e))
         {
-            QMessageBox message;
-            message.setText("Podatki o dogodku uspešno posodobljeni!");
-            message.setStyleSheet("QMessageBox { color: white; background-color: rgb(80,80,80); }"
-                                  "QMessageBox QLabel { color: white; }"
-                                  "QMessageBox QPushButton { background-color: rgb(60,60,60); border: none; outline: none; padding:6px; }");
+            MessageDialog message("Podatki o dogodku uspešno posodobljeni!");
             message.exec();
         }
         else
         {
-            QMessageBox message;
-            message.setText("Napaka pri shranjevanju, dogodek ni shranjen! Preverite, če je baza odprta v drugem programu!");
-            message.setStyleSheet("QMessageBox { color: white; background-color: rgb(80,80,80); }"
-                                  "QMessageBox QLabel { color: white; }"
-                                  "QMessageBox QPushButton { background-color: rgb(60,60,60); border: none; outline: none; padding:6px; }");
+            MessageDialog message("Napaka pri shranjevanju, dogodek ni shranjen! Preverite, če je baza odprta v drugem programu!", "Napaka pri shranjevanju");
             message.exec();
         }
     }
 }
 
-void EventWidget::save_as(Database &db)
+void EventWidget::save_as(std::shared_ptr<Database> db)
 {
     if(ui->name_edit->text() == "" || ui->type_edit->text() == "") return;
-    QMessageBox message;
-    message.setText("Dogodek bo shranjen pod novo številko, spremembe na originalnem dogodku ne bodo shranjene!");
-    message.setStyleSheet("QMessageBox { color: white; background-color: rgb(80,80,80); }"
-                          "QMessageBox QLabel { color: white; }"
-                          "QMessageBox QPushButton { background-color: rgb(60,60,60); border: none; outline: none; padding:12px;}");
+    MessageDialog message("Dogodek bo shranjen pod novo številko, spremembe na originalnem dogodku ne bodo shranjene!");
     message.exec();
     ui->number_label->setText(0);
     save(db);

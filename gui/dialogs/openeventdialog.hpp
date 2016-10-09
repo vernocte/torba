@@ -14,7 +14,7 @@ class OpenEventDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit OpenEventDialog(Database& db, QWidget *parent = 0);
+    explicit OpenEventDialog(std::shared_ptr<Database> db, QWidget *parent = 0);
     ~OpenEventDialog();
 
 private slots:
@@ -29,7 +29,7 @@ public slots:
 private:
     Ui::OpenEventDialog *ui;
     QStringList _events;
-    Database& _db;
+    std::shared_ptr<Database> _db;
 };
 
 #endif // OPENEVENTDIALOG_HPP

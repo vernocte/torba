@@ -1,12 +1,12 @@
 #include "openeventdialog.hpp"
 #include "ui_openeventdialog.h"
 
-OpenEventDialog::OpenEventDialog(Database& db, QWidget *parent) :
+OpenEventDialog::OpenEventDialog(std::shared_ptr<Database> db, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::OpenEventDialog), _db(db)
 {
     ui->setupUi(this);
-    std::vector<EventBaseEntity> events =  _db.event_list();
+    std::vector<EventBaseEntity> events =  _db->event_list();
     for(uint i=0; i<events.size(); ++i)
     {
         _events.append(QString::number(events[i].idx()) + " " + events[i].name() + " " + events[i].type());
@@ -35,7 +35,7 @@ std::vector<EventEntity> OpenEventDialog::event()
     std::vector<EventEntity> res(len);
     for(int i=0; i<len; ++i)
     {
-        res[i] = _db.get_event(std::stoi(ui->event_list->selectedItems()[i]->text().toStdString()));
+        res[i] = _db->get_event(std::stoi(ui->event_list->selectedItems()[i]->text().toStdString()));
     }
     return res;
 }

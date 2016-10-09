@@ -1,18 +1,23 @@
 #include "mainwindow.hpp"
 #include "ui_mainwindow.h"
 
-#include <QMessageBox>
 #include <QShortcut>
+
 #include "dialogs/openpersondialog.hpp"
 #include "dialogs/openeventdialog.hpp"
+#include "dialogs/messagedialog.hpp"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     _config(),
-    _connected(false)
+    _connected(false),
+    _logger(new Logger()),
+    _db()
 {
     ui->setupUi(this);
+
+    QSqlDatabase::addDatabase("QSQLITE");
 
     connect(ui->settings, SIGNAL(new_person()), ui->main_widget, SLOT(new_person()));
     connect(ui->settings, SIGNAL(new_event()), ui->main_widget, SLOT(new_event()));
@@ -66,7 +71,7 @@ void MainWindow::new_or_open_db(QString path)
     try
     {
         _connected &= false;
-        _db = Database(path);
+        _db.reset(new Database(path, _logger));
         _connected |= true;
         ui->bottom_bar->display("Povezan z bazo " + QFileInfo(path).fileName() +"!", false);
     }
@@ -85,11 +90,7 @@ void MainWindow::save()
     }
     else
     {
-        QMessageBox message;
-        message.setText("Niste povezani na bazo!");
-        message.setStyleSheet("QMessageBox { color: white; background-color: rgb(80,80,80); }"
-                              "QMessageBox QLabel { color: white; }"
-                              "QMessageBox QPushButton { background-color: rgb(60,60,60); border: none; outline: none; padding:6px; }");
+        MessageDialog message("Niste povezani na bazo!");
         message.exec();
     }
 }
@@ -102,11 +103,7 @@ void MainWindow::save_as()
     }
     else
     {
-        QMessageBox message;
-        message.setText("Niste povezani na bazo!");
-        message.setStyleSheet("QMessageBox { color: white; background-color: rgb(80,80,80); }"
-                              "QMessageBox QLabel { color: white; }"
-                              "QMessageBox QPushButton { background-color: rgb(60,60,60); border: none; outline: none; padding:6px; }");
+        MessageDialog message("Niste povezani na bazo!");
         message.exec();
     }
 }
@@ -119,11 +116,7 @@ void MainWindow::save_all()
     }
     else
     {
-        QMessageBox message;
-        message.setText("Niste povezani na bazo!");
-        message.setStyleSheet("QMessageBox { color: white; background-color: rgb(80,80,80); }"
-                              "QMessageBox QLabel { color: white; }"
-                              "QMessageBox QPushButton { background-color: rgb(60,60,60); border: none; outline: none; padding:6px; }");
+        MessageDialog message("Niste povezani na bazo!");
         message.exec();
     }
 }
@@ -144,11 +137,7 @@ void MainWindow::emit_open_person()
     }
     else
     {
-        QMessageBox message;
-        message.setText("Niste povezani na bazo!");
-        message.setStyleSheet("QMessageBox { color: white; background-color: rgb(80,80,80); }"
-                              "QMessageBox QLabel { color: white; }"
-                              "QMessageBox QPushButton { color:white; border: none; outline: none; padding:6px;");
+        MessageDialog message("Niste povezani na bazo!");
         message.exec();
     }
 }
@@ -169,11 +158,7 @@ void MainWindow::emit_open_event()
     }
     else
     {
-        QMessageBox message;
-        message.setText("Niste povezani na bazo!");
-        message.setStyleSheet("QMessageBox { color: white; background-color: rgb(80,80,80); }"
-                              "QMessageBox QLabel { color: white; }"
-                              "QMessageBox QPushButton { color:white; border: none; outline: none; padding:6px;");
+        MessageDialog message("Niste povezani na bazo!");
         message.exec();
     }
 }
@@ -188,17 +173,13 @@ void MainWindow::delete_person()
             std::vector<int> selected = person_dialog->index();
             for(auto it=selected.begin(); it!=selected.end(); ++it)
             {
-                _db.delete_person(*it);
+                _db->delete_person(*it);
             }
         }
     }
     else
     {
-        QMessageBox message;
-        message.setText("Niste povezani na bazo!");
-        message.setStyleSheet("QMessageBox { color: white; background-color: rgb(80,80,80); }"
-                              "QMessageBox QLabel { color: white; }"
-                              "QMessageBox QPushButton { background-color: rgb(60,60,60); border: none; outline: none; padding:6px; }");
+        MessageDialog message("Niste povezani na bazo!");
         message.exec();
     }
 }
@@ -213,17 +194,13 @@ void MainWindow::delete_event()
             std::vector<int> selected = event_dialog->index();
             for(auto it=selected.begin(); it!=selected.end(); ++it)
             {
-                _db.delete_event(*it);
+                _db->delete_event(*it);
             }
         }
     }
     else
     {
-        QMessageBox message;
-        message.setText("Niste povezani na bazo!");
-        message.setStyleSheet("QMessageBox { color: white; background-color: rgb(80,80,80); }"
-                              "QMessageBox QLabel { color: white; }"
-                              "QMessageBox QPushButton { background-color: rgb(60,60,60); border: none; outline: none; padding:6px; }");
+        MessageDialog message("Niste povezani na bazo!");
         message.exec();
     }
 }

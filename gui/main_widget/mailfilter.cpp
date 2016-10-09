@@ -14,12 +14,12 @@ MailFilter::~MailFilter()
     delete ui;
 }
 
-void MailFilter::save(Database&)
+void MailFilter::save(std::shared_ptr<Database>)
 {
 
 }
 
-void MailFilter::save_as(Database&)
+void MailFilter::save_as(std::shared_ptr<Database>)
 {
 
 }

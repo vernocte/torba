@@ -4,8 +4,6 @@
 #include "eventwidget.hpp"
 #include "mailfilter.hpp"
 
-#include <QDebug>
-
 MainWidget::MainWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MainWidget)
@@ -51,17 +49,17 @@ void MainWidget::change_text(QString val)
     ui->main_widget->setTabText(ui->main_widget->currentIndex() ,val);
 }
 
-void MainWidget::save(Database &db)
+void MainWidget::save(std::shared_ptr<Database> &db)
 {
     ((EditorBase*)ui->main_widget->currentWidget())->save(db);
 }
 
-void MainWidget::save_as(Database &db)
+void MainWidget::save_as(std::shared_ptr<Database> &db)
 {
     ((EditorBase*)ui->main_widget->currentWidget())->save_as(db);
 }
 
-void MainWidget::save_all(Database &db)
+void MainWidget::save_all(std::shared_ptr<Database> &db)
 {
     for(int i=0; i<ui->main_widget->count(); ++i)
     {
@@ -69,14 +67,14 @@ void MainWidget::save_all(Database &db)
     }
 }
 
-void MainWidget::open_person(PersonEntity p)
+void MainWidget::open_person(const PersonEntity& p)
 {
     PersonWidget* person = new PersonWidget(p);
     connect(person, SIGNAL(base_text(QString)), this, SLOT(change_text(QString)));
     ui->main_widget->addTab(person, p.name() + " " + p.surname());
 }
 
-void MainWidget::open_event(EventEntity e)
+void MainWidget::open_event(const EventEntity& e)
 {
     EventWidget* event = new EventWidget(e);
     connect(event, SIGNAL(base_text(QString)), this, SLOT(change_text(QString)));
