@@ -232,11 +232,25 @@ public:
     std::vector<EventBaseEntity>& participated();
 
     /*
+    #### gets participated
+
+    [returns]: const reference to participated vector
+    */
+    const std::vector<EventBaseEntity>& participated() const;
+
+    /*
     #### gets or sets lead
 
     [returns]: reference to lead vector
     */
     std::vector<EventBaseEntity>& lead();
+
+    /*
+    #### gets lead
+
+    [returns]: const reference to lead vector
+    */
+    const std::vector<EventBaseEntity>& lead() const;
 };
 
 #endif // PERSON_HPP

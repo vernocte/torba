@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string/>
   </property>
   <property name="styleSheet">
    <string notr="true">border: none;
@@ -22,7 +22,8 @@ background-color: rgb(80,80,80);</string>
     <widget class="QLabel" name="message_label">
      <property name="font">
       <font>
-       <pointsize>12</pointsize>
+       <pointsize>11</pointsize>
+       <italic>false</italic>
       </font>
      </property>
      <property name="styleSheet">
@@ -60,16 +61,10 @@ background-color: rgb(80,80,80);</string>
    </item>
    <item row="1" column="1">
     <widget class="QPushButton" name="ok_button">
-     <property name="minimumSize">
-      <size>
-       <width>64</width>
-       <height>64</height>
-      </size>
-     </property>
      <property name="maximumSize">
       <size>
-       <width>64</width>
-       <height>64</height>
+       <width>40</width>
+       <height>40</height>
       </size>
      </property>
      <property name="text">
@@ -81,8 +76,8 @@ background-color: rgb(80,80,80);</string>
      </property>
      <property name="iconSize">
       <size>
-       <width>64</width>
-       <height>64</height>
+       <width>40</width>
+       <height>40</height>
       </size>
      </property>
     </widget>

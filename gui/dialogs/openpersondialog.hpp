@@ -19,7 +19,7 @@ class OpenPersonDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit OpenPersonDialog(std::shared_ptr<Database> &db, QWidget *parent = 0);
+    explicit OpenPersonDialog(std::shared_ptr<Database> &db, bool allow_new, QWidget *parent = 0);
     ~OpenPersonDialog();
 
 public slots:

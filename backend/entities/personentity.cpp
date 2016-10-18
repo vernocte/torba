@@ -254,11 +254,31 @@ std::vector<EventBaseEntity>& PersonEntity::participated()
 }
 
 /*
+#### gets participated
+
+[returns]: const reference to participated vector
+*/
+const std::vector<EventBaseEntity>& PersonEntity::participated() const
+{
+    return _participated;
+}
+
+/*
 #### gets or sets lead
 
 [returns]: reference to lead vector
 */
 std::vector<EventBaseEntity>& PersonEntity::lead()
+{
+    return _lead;
+}
+
+/*
+#### gets lead
+
+[returns]: const reference to lead vector
+*/
+const std::vector<EventBaseEntity>& PersonEntity::lead() const
 {
     return _lead;
 }

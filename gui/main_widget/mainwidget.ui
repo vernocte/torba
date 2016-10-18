@@ -53,7 +53,7 @@ QTextEdit
     <number>0</number>
    </property>
    <item row="0" column="0">
-    <widget class="QTabWidget" name="main_widget">
+    <widget class="MainTabWidget" name="main_widget">
      <property name="styleSheet">
       <string notr="true">QTabBar::tab {
     background-color: rgb(60,60,60);
@@ -77,6 +77,14 @@ QTabBar::tab:selected {
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MainTabWidget</class>
+   <extends>QTabWidget</extends>
+   <header>gui/subwidgets/maintabwidget.hpp</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

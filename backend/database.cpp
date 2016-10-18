@@ -1,13 +1,125 @@
 #include "database.hpp"
 
-#include <stdexcept>
+#include "exceptions/databaseexception.hpp"
 
-Database::Database(QString path, std::shared_ptr<Logger> &logger) : _logger(logger)
+#include <QDebug>
+
+// ### Private functions
+
+// #### Create database
+void Database::create_database()
 {
-    _db = QSqlDatabase::database();
+    _db.open();
 
-    _folder = QFileInfo(path).absoluteDir().absolutePath();
+    _logger->log("Started database creation");
 
+    QSqlQuery query;
+
+    // ##### Create tables
+
+    // person
+    if(!query.exec("create table person (idx integer primary key, name text not null, surname text not null);"))
+    {
+        throw DatabaseException("create", "person", query.lastError().text().toStdString());
+    }
+
+    // person_property
+    if(!query.exec("create table person_property (idx integer primary key, property text not null);"))
+    {
+        throw DatabaseException("create", "person_property", query.lastError().text().toStdString());
+    }
+    if(!query.exec("insert into person_property values"
+               "(1,  'birthday'),"
+               "(2,  'birthplace'),"
+               "(3,  'email'),"
+               "(4,  'street'),"
+               "(5,  'street_number'),"
+               "(6,  'post'),"
+               "(7,  'postal_number'),"
+               "(8,  'country'),"
+               "(9,  'phone'),"
+               "(10, 'sex'),"
+               "(11, 'comment'),"
+               "(12, 'role'),"
+               "(13, 'family');"))
+    {
+        throw DatabaseException("insert", "person_property", query.lastError().text().toStdString());
+    }
+
+    // person_data
+    if(!query.exec("create table person_data (idx integer primary key, idx_person integer not null, "
+               "idx_property integer not null, value text);"))
+    {
+        throw DatabaseException("create", "person_property", query.lastError().text().toStdString());
+    }
+
+    // event
+    if(!query.exec("create table event (idx integer primary key, name text not null, type text not null);"))
+    {
+        throw DatabaseException("create", "event", query.lastError().text().toStdString());
+    }
+
+    // event_property
+    if(!query.exec("create table event_property (idx integer primary key, property text not null);"))
+    {
+        throw DatabaseException("create", "event_property", query.lastError().text().toStdString());
+    }
+    if(!query.exec("insert into event_property values"
+               "(1, 'start_date'),"
+               "(2, 'end_date'),"
+               "(3, 'comment');"))
+    {
+        throw DatabaseException("insert", "event_property", query.lastError().text().toStdString());
+    }
+
+    // event_data
+    if(!query.exec("create table event_data (idx integer primary key, idx_event integer not null,"
+               "idx_property integer not null, value text);"))
+    {
+        throw DatabaseException("create", "event_data", query.lastError().text().toStdString());
+    }
+
+    // attendance
+    if(!query.exec("create table attendance (idx integer primary key, idx_person integer not null,"
+               "idx_event integer not null, leader int not null);"))
+    {
+        throw DatabaseException("create", "attendance", query.lastError().text().toStdString());
+    }
+
+    // role
+    if(!query.exec("create table role (idx integer primary key, value text not null);"))
+    {
+        throw DatabaseException("create", "role", query.lastError().text().toStdString());
+    }
+
+    // family
+    if(!query.exec("create table family (idx integer primary key, value text not null);"))
+    {
+        throw DatabaseException("create", "family", query.lastError().text().toStdString());
+    }
+
+    // system_info
+    if(!query.exec("create table system_info (idx integer primary key, property text not null, value text not null);"))
+    {
+        throw DatabaseException("create", "system_info", query.lastError().text().toStdString());
+    }
+    if(!query.exec("insert into system_info values"
+               "(1, 'program version', '0.1.0-beta'),"
+               "(2, 'database version', '0.1.0-beta');"))
+    {
+        throw DatabaseException("insert", "system_info", query.lastError().text().toStdString());
+    }
+
+    _db.close();
+    _logger->log("Database successfully created");
+}
+
+// ### Constructors
+
+// #### File and logger constructor
+Database::Database(QString path, std::shared_ptr<Logger> &logger) :
+    _db(QSqlDatabase::database()), _logger(logger), _folder(QFileInfo(path).absoluteDir().absolutePath())
+{
     bool create = !QFileInfo(path).exists();
     _db.setDatabaseName(path);
     if(create)
@@ -15,189 +127,77 @@ Database::Database(QString path, std::shared_ptr<Logger> &logger) : _logger(logg
         create_database();
         _logger->log("Database " + path + " successfuly created");
     }
-
     _logger->log("Database " + path + " successfuly opened");
 }
 
+// ### Destructor
 Database::~Database()
 {
     // because, reasons
     _db = QSqlDatabase();
+
     _logger->log("Database closed");
 }
 
-void Database::create_database()
+/*
+#### Folder
+
+[returns]: folder database is in
+*/
+QString Database::folder() const
 {
-    _db.open();
-    QSqlQuery query;
-
-    // create tables
-    if(!query.exec("CREATE TABLE person (idx integer primary key, name text not null, surname text not null);"))
-    {
-        _logger->log("Error creating person: " + query.lastError().text());
-        throw std::logic_error(query.lastError().text().toStdString());
-    }
-    if(!query.exec("CREATE TABLE person_property (idx integer primary key, property text not null);"))
-    {
-        _logger->log("Error creating person_property: " + query.lastError().text());
-    }
-    if(!query.exec("CREATE TABLE person_data (idx integer primary key, idx_person integer not null, "
-               "idx_property integer not null, value text);"))
-    {
-        _logger->log("Error creating person_data: " + query.lastError().text());
-        throw std::logic_error(query.lastError().text().toStdString());
-    }
-    if(!query.exec("CREATE TABLE atendance (idx integer primary key, idx_person integer not null,"
-               "idx_event integer not null, int leader not null);"))
-    {
-        _logger->log("Error creating atendance: " + query.lastError().text());
-        throw std::logic_error(query.lastError().text().toStdString());
-    }
-    if(!query.exec("CREATE TABLE event (idx integer primary key, name text not null, type text not null);"))
-    {
-        _logger->log("Error creating event: " + query.lastError().text());
-        throw std::logic_error(query.lastError().text().toStdString());
-    }
-    if(!query.exec("CREATE TABLE event_property (idx integer primary key, property text not null);"))
-    {
-        _logger->log("Error creating event_property: " + query.lastError().text());
-        throw std::logic_error(query.lastError().text().toStdString());
-    }
-    if(!query.exec("CREATE TABLE event_data (idx integer primary key, idx_event integer not null,"
-               "idx_property integer not null, value text);"))
-    {
-        _logger->log("Error creating event_data: " + query.lastError().text());
-        throw std::logic_error(query.lastError().text().toStdString());
-    }
-    if(!query.exec("CREATE TABLE system_info (idx integer primary key, property text not null, value text not null);"))
-    {
-        _logger->log("Error creating system_info: " + query.lastError().text());
-        throw std::logic_error(query.lastError().text().toStdString());
-    }
-    if(!query.exec("CREATE TABLE roles (idx integer primary key, value text not null);"))
-    {
-        _logger->log("Error creating roles: " + query.lastError().text());
-        throw std::logic_error(query.lastError().text().toStdString());
-    }
-    if(!query.exec("CREATE TABLE family (idx integer primary key, value text not null);"))
-    {
-        _logger->log("Error creating family: " + query.lastError().text());
-        throw std::logic_error(query.lastError().text().toStdString());
-    }
-
-
-    // fill lookup tables
-    if(!query.exec("INSERT INTO person_property VALUES"
-               "(1, 'birthday'),"
-               "(2, 'birthplace'),"
-               "(3, 'email'),"
-               "(4, 'street'),"
-               "(5, 'street_number'),"
-               "(6, 'post'),"
-               "(7, 'postal_number'),"
-               "(8, 'country'),"
-               "(9, 'phone'),"
-               "(10, 'sex'),"
-               "(11, 'comment'),"
-               "(12, 'role'),"
-               "(13, 'family');"))
-    {
-        _logger->log("Error creating family: " + query.lastError().text());
-        throw std::logic_error(query.lastError().text().toStdString());
-    }
-
-    if(!query.exec("INSERT INTO event_property VALUES"
-               "(1, 'start_date'),"
-               "(2, 'end_date'),"
-               "(3, 'comment');"))
-    {
-        _logger->log("Error creating family: " + query.lastError().text());
-        throw std::logic_error(query.lastError().text().toStdString());
-    }
-
-    if(!query.exec("INSERT INTO system_info VALUES"
-               "(1, 'program version', '0.1.0-beta'),"
-               "(2, 'database version', '0.1.0-beta');"))
-    {
-        _logger->log("Error creating family: " + query.lastError().text());
-        throw std::logic_error(query.lastError().text().toStdString());
-    }
-
-    _db.close();
-    _logger->log("Database successfully created");
+    return _folder;
 }
 
-void Database::save_person(PersonEntity p)
+/*
+#### insert person
+
+[p]: person to insert
+[returns]: index of inserted person
+*/
+int Database::insert_person(const PersonEntity &p)
 {
     _db.open();
     QSqlQuery query;
-    query.prepare("UPDATE person SET name = :name, surname= :surname where idx = :idx;");
-    query.bindValue(":name", p.name());
-    query.bindValue(":surname", p.surname());
-    query.bindValue(":idx", p.idx());
-    if(!query.exec())
-    {
-        throw std::logic_error(query.lastError().text().toStdString());
-    }
-    query.prepare("DELETE from person_data where idx_person = :idx;");
-    query.bindValue(":idx", p.idx());
-    if(!query.exec())
-    {
-        throw std::logic_error(query.lastError().text().toStdString());
-    }
-    query.prepare("INSERT INTO person_data (idx_person, idx_property, value) VALUES"
-                  "(:idx, 1, :birthday),"
-                  "(:idx, 2, :birthplace),"
-                  "(:idx, 3, :email),"
-                  "(:idx, 4, :street),"
-                  "(:idx, 5, :street_number),"
-                  "(:idx, 6, :post),"
-                  "(:idx, 7, :postal_number),"
-                  "(:idx, 8, :country),"
-                  "(:idx, 9, :phone),"
-                  "(:idx, 10, :sex),"
-                  "(:idx, 11, :comment);");
-    query.bindValue(":idx", p.idx());
-    query.bindValue(":birthday", p.birthday().toString("yyyy-MM-dd"));
-    query.bindValue(":birthplace", p.birthplace());
-    query.bindValue(":email", p.email());
-    query.bindValue(":street",p.street());
-    query.bindValue(":street_number", p.street_number());
-    query.bindValue(":post", p.post());
-    query.bindValue(":postal_number", p.postal_number());
-    query.bindValue(":country", p.country());
-    query.bindValue(":phone", p.phone());
-    query.bindValue(":sex", (p.sex()) ? "female" : "male");
-    query.bindValue(":comment", p.comment());
 
-    if(!query.exec())
-    {
-        throw std::logic_error(query.lastError().text().toStdString());
-    }
-    _db.close();
-}
-
-int Database::insert_person(PersonEntity p)
-{
-    _db.open();
-    QSqlQuery query;
-    query.prepare("INSERT INTO  person(name, surname) VALUES(:name, :surname);");
-    query.bindValue(":name", p.name());
-    query.bindValue(":surname", p.surname());
-    if(!query.exec())
-    {
-        throw std::logic_error(query.lastError().text().toStdString());
-    }
-    if(!query.exec("SELECT last_insert_rowid();"))
-    {
-        throw std::logic_error(query.lastError().text().toStdString());
-    }
     int idx = 0;
-
-    while (query.next())
+    if(p.idx() == 0)
     {
-        idx = query.value(0).toInt();
+        // insert person
+        query.prepare("insert into  person(name, surname) values(:name, :surname);");
+        query.bindValue(":name", p.name());
+        query.bindValue(":surname", p.surname());
+        if(!query.exec())
+        {
+            throw DatabaseException("insert", "person", query.lastError().text().toStdString());
+        }
+
+        // get index
+        if(!query.exec("SELECT last_insert_rowid();"))
+        {
+            _logger->log("Error getting index of inserted person: " + query.lastError().text());
+            throw std::logic_error(query.lastError().text().toStdString());
+        }
+        while (query.next())
+        {
+            idx = query.value(0).toInt();
+        }
     }
+    else
+    {
+        // insert person
+        query.prepare("insert into  person(idx, name, surname) values(:idx, :name, :surname);");
+        query.bindValue(":name", p.name());
+        query.bindValue(":surname", p.surname());
+        query.bindValue(":idx", p.idx());
+        if(!query.exec())
+        {
+            throw DatabaseException("insert", "person", query.lastError().text().toStdString());
+        }
+        idx = p.idx();
+    }
+
+    // insert person data
     query.prepare("INSERT INTO person_data (idx_person, idx_property, value) VALUES"
                   "(:idx, 1, :birthday),"
                   "(:idx, 2, :birthplace),"
@@ -225,55 +225,122 @@ int Database::insert_person(PersonEntity p)
 
     if(!query.exec())
     {
-        throw std::logic_error(query.lastError().text().toStdString());
+        throw DatabaseException("insert", "person_data", query.lastError().text().toStdString());
+    }
+
+    // attendance
+    for(auto it=p.lead().begin(); it!=p.lead().end(); ++it)
+    {
+        query.prepare("insert into attendance(idx_person, idx_event, leader) values (:idx, :idx_event, 1)");
+        query.bindValue(":idx", p.idx());
+        query.bindValue(":idx_event", it->idx());
+        if(!query.exec())
+        {
+            throw DatabaseException("insert", "attendance", query.lastError().text().toStdString());
+        }
+    }
+    for(auto it=p.participated().begin(); it!=p.participated().end(); ++it)
+    {
+        query.prepare("insert into attendance(idx_person, idx_event, leader) values (:idx, :idx_event, 0)");
+        query.bindValue(":idx", p.idx());
+        query.bindValue(":idx_event", it->idx());
+        if(!query.exec())
+        {
+            throw DatabaseException("insert", "attendance", query.lastError().text().toStdString());
+        }
     }
     _db.close();
     return idx;
 }
 
+/*
+#### delete person
 
-std::vector<PersonBaseEntity> Database::person_list()
+[p]: person to insert
+[returns]: index of inserted person
+*/
+void Database::delete_person(int idx)
 {
     _db.open();
     QSqlQuery query;
-    std::vector<PersonBaseEntity> values;
-    if(!query.exec("SELECT idx, name, surname FROM person;"))
-    {
-        throw std::logic_error(query.lastError().text().toStdString());
-    }
-    while (query.next())
-    {
-        values.emplace_back(PersonBaseEntity(query.value(0).toInt(), query.value(1).toString(),  query.value(2).toString()));
-    }
-    _db.close();
-    return values;
-}
 
-PersonEntity Database::get_person(int idx)
-{
-    if(idx==0) return PersonEntity();
-
-    _db.open();
-
-    PersonEntity p;
-    QSqlQuery query;
-    query.prepare("SELECT name, surname from person where idx = :idx;");
+    // person data
+    query.prepare("delete from person_data where idx_person = :idx");
     query.bindValue(":idx", idx);
     if(!query.exec())
     {
-        throw std::logic_error(query.lastError().text().toStdString());
+        throw DatabaseException("delete", "person_data", query.lastError().text().toStdString());
+    }
+
+    // attendace
+    query.prepare("delete from attendance where idx_person = :idx");
+    query.bindValue(":idx", idx);
+    if(!query.exec())
+    {
+        throw DatabaseException("delete", "attendance", query.lastError().text().toStdString());
+    }
+
+    // person
+    query.prepare("delete from person where idx = :idx");
+    query.bindValue(":idx", idx);
+    if(!query.exec())
+    {
+        throw DatabaseException("delete", "person", query.lastError().text().toStdString());
+    }
+
+    _db.close();
+}
+
+/*
+#### save person
+
+[p]: person to save
+*/
+void Database::save_person(const PersonEntity& p)
+{
+    delete_person(p.idx());
+    insert_person(p);
+}
+
+/*
+#### get person
+
+[idx]: index of person
+[returns]: person with given index
+*/
+PersonEntity Database::get_person(int idx)
+{
+    // return new person
+    if(idx==0) return PersonEntity();
+
+    _db.open();
+    QSqlQuery query;
+
+    // resulting entity
+    PersonEntity p;
+
+    // set idx
+    p.idx(idx);
+
+    // read person
+    query.prepare("select name, surname from person where idx = :idx;");
+    query.bindValue(":idx", idx);
+    if(!query.exec())
+    {
+        throw DatabaseException("select", "person", query.lastError().text().toStdString());
     }
     while (query.next())
     {
         p.name(query.value(0).toString());
         p.surname(query.value(1).toString());
     }
-    p.idx(idx);
-    query.prepare("SELECT idx_property, value from person_data where idx_person = :idx;");
+
+    // person_data
+    query.prepare("select idx_property, value from person_data where idx_person = :idx;");
     query.bindValue(":idx", idx);
     if(!query.exec())
     {
-        throw std::logic_error(query.lastError().text().toStdString());
+        throw DatabaseException("select", "person_data", query.lastError().text().toStdString());
     }
     while (query.next())
     {
@@ -313,75 +380,87 @@ PersonEntity Database::get_person(int idx)
             p.comment(query.value(1).toString());
             break;
         default:
-            break;
+            throw DatabaseException("select", "person_data", "Unrecognised index: " + query.value(0).toString().toStdString());
         }
     }
+
+    // attendance attending
+    query.prepare("select idx, name, type from event where idx in (select idx_event from attendance where idx_person = :idx_person and leader = 0);");
+    query.bindValue(":idx_person", p.idx());
+    if(!query.exec())
+    {
+        throw DatabaseException("select", "attendance", query.lastError().text().toStdString());
+    }
+    while (query.next())
+    {
+        p.participated().emplace_back(EventBaseEntity(query.value(0).toInt(), query.value(1).toString(), query.value(2).toString()));
+    }
+
+    // attendance leading
+    query.prepare("select idx, name, type from event where idx in (select idx_event from attendance where idx_person = :idx_person and leader = 1);");
+    query.bindValue(":idx_person", p.idx());
+    if(!query.exec())
+    {
+        throw DatabaseException("select", "attendance", query.lastError().text().toStdString());
+    }
+    while (query.next())
+    {
+        qDebug() << "lead";
+        p.lead().emplace_back(EventBaseEntity(query.value(0).toInt(), query.value(1).toString(), query.value(2).toString()));
+    }
+
     _db.close();
     return p;
 }
 
-void Database::delete_person(int idx)
-{
-    _db.open();
-    QSqlQuery query;
-    query.prepare("DELETE from person_data where idx_person = :idx");
-    query.bindValue(":idx", idx);
-    query.exec();
-    query.prepare("DELETE from person where idx = :idx");
-    query.bindValue(":idx", idx);
-    if(!query.exec())
-    {
-        throw std::logic_error(query.lastError().text().toStdString());
-    }
-    _db.close();
-}
+/*
+#### get list of persons
 
-void Database::insert_role(QString val)
+[idx]: index of person
+[returns]: person with given index
+*/
+std::vector<PersonBaseEntity> Database::person_list()
 {
     _db.open();
     QSqlQuery query;
-    query.prepare("SELECT COUNT(value) from role where value = :val");
-    query.bindValue(":val", val);
-    if(!query.exec())
+
+    std::vector<PersonBaseEntity> values;
+
+    // read persons
+    if(!query.exec("select idx, name, surname from person;"))
     {
-        throw std::logic_error(query.lastError().text().toStdString());
+        throw DatabaseException("select", "person", query.lastError().text().toStdString());
     }
-    int tmp = 1;
     while (query.next())
     {
-        tmp = query.value(0).toInt();
+        values.emplace_back(PersonBaseEntity(query.value(0).toInt(), query.value(1).toString(),  query.value(2).toString()));
     }
-    if(tmp == 0)
-    {
-        query.prepare("INSERT into role (value) VALUES (:val)");
-        query.bindValue(":val", val);
-        if(!query.exec())
-        {
-            throw std::logic_error(query.lastError().text().toStdString());
-        }
-    }
+
     _db.close();
+
+    return values;
 }
+
 
 void Database::save_event(EventEntity e)
 {
     _db.open();
     QSqlQuery query;
-    query.prepare("UPDATE event SET name = :name, type= :type where idx = :idx;");
+    query.prepare("update event set name = :name, type= :type where idx = :idx;");
     query.bindValue(":name", e.name());
     query.bindValue(":type", e.type());
     query.bindValue(":idx", e.idx());
     if(!query.exec())
     {
-        throw std::logic_error(query.lastError().text().toStdString());
+        throw DatabaseException("update", "event", query.lastError().text().toStdString());
     }
-    query.prepare("DELETE from event_data where idx_event = :idx;");
+    query.prepare("delete from event_data where idx_event = :idx;");
     query.bindValue(":idx", e.idx());
     if(!query.exec())
     {
-        throw std::logic_error(query.lastError().text().toStdString());
+        throw DatabaseException("delete", "event_data", query.lastError().text().toStdString());
     }
-    query.prepare("INSERT INTO event_data (idx_event, idx_property, value) VALUES"
+    query.prepare("insert into event_data (idx_event, idx_property, value) VALUES"
                   "(:idx, 1, :start_date),"
                   "(:idx, 2, :end_date),"
                   "(:idx, 3, :comment);");
@@ -392,7 +471,7 @@ void Database::save_event(EventEntity e)
 
     if(!query.exec())
     {
-        throw std::logic_error(query.lastError().text().toStdString());
+        throw DatabaseException("insert", "event_data", query.lastError().text().toStdString());
     }
     _db.close();
 }
@@ -402,23 +481,24 @@ EventEntity Database::get_event(int idx)
     _db.open();
     EventEntity e;
     QSqlQuery query;
-    query.prepare("SELECT name, type from event where idx= :idx");
+    query.prepare("select name, type from event where idx= :idx");
     query.bindValue(":idx", idx);
     if(!query.exec())
     {
-        throw std::logic_error(query.lastError().text().toStdString());
+        throw DatabaseException("select", "event", query.lastError().text().toStdString());
     }
     while(query.next())
     {
         e.name(query.value(0).toString());
         e.type(query.value(1).toString());
+        e.idx(idx);
     }
 
-    query.prepare("SELECT idx_property, value from event_data where idx_event = :idx");
+    query.prepare("select idx_property, value from event_data where idx_event = :idx");
     query.bindValue(":idx", idx);
     if(!query.exec())
     {
-        throw std::logic_error(query.lastError().text().toStdString());
+        throw DatabaseException("select", "event_data", query.lastError().text().toStdString());
     }
     while(query.next())
     {
@@ -442,16 +522,16 @@ int Database::insert_event(EventEntity e)
 {
     _db.open();
     QSqlQuery query;
-    query.prepare("INSERT INTO  event(name, type) VALUES(:name, :type);");
+    query.prepare("insert into  event(name, type) VALUES(:name, :type);");
     query.bindValue(":name", e.name());
     query.bindValue(":type", e.type());
     if(!query.exec())
     {
-        throw std::logic_error(query.lastError().text().toStdString());
+        throw DatabaseException("insert", "event", query.lastError().text().toStdString());
     }
-    if(!query.exec("SELECT last_insert_rowid();"))
+    if(!query.exec("select last_insert_rowid();"))
     {
-        throw std::logic_error(query.lastError().text().toStdString());
+        throw DatabaseException("select", "last_insert_rowid", query.lastError().text().toStdString());
     }
     int idx = 0;
 
@@ -461,7 +541,7 @@ int Database::insert_event(EventEntity e)
     }
     if(idx!=0)
     {
-        query.prepare("INSERT into event_data (idx_event, idx_property, value) VALUES"
+        query.prepare("insert into event_data (idx_event, idx_property, value) VALUES"
                       "(:idx, 1, :start_date),"
                       "(:idx, 2, :end_date),"
                       "(:idx, 3, :comment);");
@@ -471,12 +551,12 @@ int Database::insert_event(EventEntity e)
         query.bindValue(":comment", e.comment());
         if(!query.exec())
         {
-            throw std::logic_error(query.lastError().text().toStdString());
+            throw DatabaseException("insert", "event_data", query.lastError().text().toStdString());
         }
     }
     else
     {
-        throw std::logic_error(query.lastError().text().toStdString());
+        throw DatabaseException("select", "last_insert_rowid", query.lastError().text().toStdString());
     }
     _db.close();
     return idx;
@@ -487,9 +567,9 @@ std::vector<EventBaseEntity> Database::event_list()
     _db.open();
     QSqlQuery query;
     std::vector<EventBaseEntity> events;
-    if(!query.exec("SELECT idx, name, type from event;"))
+    if(!query.exec("select idx, name, type from event;"))
     {
-        throw std::logic_error(query.lastError().text().toStdString());
+        throw DatabaseException("select", "event", query.lastError().text().toStdString());
     }
     while(query.next())
     {
@@ -507,19 +587,17 @@ void Database::delete_event(int idx)
 {
     _db.open();
     QSqlQuery query;
-    query.prepare("DELETE from event where idx = :idx");
+    query.prepare("delete from event where idx = :idx");
     query.bindValue(":idx", idx);
-    query.exec();
+    if(!query.exec())
+    {
+        throw DatabaseException("delete", "event", query.lastError().text().toStdString());
+    }
     query.prepare("DELETE from event_data where idx_event = :idx");
     query.bindValue(":idx", idx);
     if(!query.exec())
     {
-        throw std::logic_error(query.lastError().text().toStdString());
+        throw DatabaseException("select", "attendance", query.lastError().text().toStdString());
     }
     _db.close();
-}
-
-QString Database::folder()
-{
-    return _folder;
 }

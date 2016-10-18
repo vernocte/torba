@@ -9,7 +9,7 @@ OpenEventDialog::OpenEventDialog(std::shared_ptr<Database> db, QWidget *parent) 
     std::vector<EventBaseEntity> events =  _db->event_list();
     for(uint i=0; i<events.size(); ++i)
     {
-        _events.append(QString::number(events[i].idx()) + " " + events[i].name() + " " + events[i].type());
+        _events.append(QString::number(events[i].idx()) + "\t" + events[i].name() + "\t" + events[i].type());
     }
     ui->event_list->addItems(_events);
 }

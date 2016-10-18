@@ -2,9 +2,14 @@
 #include "ui_personwidget.h"
 
 #include "../dialogs/messagedialog.hpp"
+#include "../dialogs/openeventdialog.hpp"
+#include "../../backend/entities/evententity.hpp"
+#include "../subwidgets/eventattendancewidget.hpp"
 
-PersonWidget::PersonWidget(PersonEntity p, QWidget *parent) :
-    EditorBase(parent),
+#include <QPainter>
+
+PersonWidget::PersonWidget(std::shared_ptr<Database> db, PersonEntity p, QWidget *parent) :
+    EditorBase(parent), _db(db),
     ui(new Ui::PersonWidget)
 {
     ui->setupUi(this);
@@ -14,7 +19,6 @@ PersonWidget::PersonWidget(PersonEntity p, QWidget *parent) :
     {
         ui->name_edit->setStyleSheet("color: white;"
                 "background-color: rgb(40,40,40);"
-                "border: 2px solid red;"
         );
     }
     ui->surname_edit->setText(p.surname());
@@ -22,7 +26,6 @@ PersonWidget::PersonWidget(PersonEntity p, QWidget *parent) :
     {
         ui->surname_edit->setStyleSheet("color: white;"
                 "background-color: rgb(40,40,40);"
-                "border: 2px solid red;"
         );
     }
     ui->birth_date_edit->setDate(p.birthday());
@@ -36,6 +39,21 @@ PersonWidget::PersonWidget(PersonEntity p, QWidget *parent) :
     ui->street_edit->setText(p.street());
     ui->street_number_edit->setText(p.street_number());
     ui->country_edit->setText(p.country());
+    for(auto it=p.lead().begin(); it!=p.lead().end(); ++it)
+    {
+        qDebug() << "lead";
+        QListWidgetItem *item = new QListWidgetItem();
+        item->setSizeHint(QSize(item->sizeHint().width(), 30));
+        ui->events_list->addItem(item);
+        ui->events_list->setItemWidget(item, new EventAttendanceWidget(*it, true, ui->events_list));
+    }
+    for(auto it=p.participated().begin(); it!=p.participated().end(); ++it)
+    {
+        QListWidgetItem *item = new QListWidgetItem();
+        item->setSizeHint(QSize(item->sizeHint().width(), 30));
+        ui->events_list->addItem(item);
+        ui->events_list->setItemWidget(item, new EventAttendanceWidget(*it, false, ui->events_list));
+    }
 }
 
 PersonWidget::~PersonWidget()
@@ -82,16 +100,16 @@ void PersonWidget::on_name_edit_textChanged(const QString)
     emit base_text(text);
 }
 
-void PersonWidget::save_as(std::shared_ptr<Database> db)
+void PersonWidget::save_as()
 {
     if(ui->name_edit->text()=="" || ui->surname_edit->text()=="") return;
     MessageDialog message("Oseba bo shranjena pod novo številko, spremembe na originalni osebi ne bodo shranjene!");
     message.exec();
     ui->number_label->setText(0);
-    save(db);
+    save();
 }
 
-void PersonWidget::save(std::shared_ptr<Database> db)
+void PersonWidget::save()
 {
     if(ui->name_edit->text()=="" || ui->surname_edit->text()=="") return;
     PersonEntity p;
@@ -109,13 +127,19 @@ void PersonWidget::save(std::shared_ptr<Database> db)
     p.sex(ui->sex_combobox->currentIndex()==1);
     p.street(ui->street_edit->text());
     p.street_number(ui->street_number_edit->text());
+    for(int i=0; i<ui->events_list->count(); ++i)
+    {
+        std::pair<int, bool> attendance = ((EventAttendanceWidget*)ui->events_list->itemWidget(ui->events_list->item(i)))->get();
+        if(attendance.second) p.lead().emplace_back(EventBaseEntity(attendance.first));
+        else p.participated().emplace_back(EventBaseEntity(attendance.first));
+    }
 
     if(p.idx()==0)
     {
-        ui->number_label->setText(QString::number(db->insert_person(p)));
+        ui->number_label->setText(QString::number(_db->insert_person(p)));
         if(ui->number_label->text().toInt()==0)
         {
-            MessageDialog message("Napaka pri shranjevanju, oseba ni shranjena! Preverite, če je baza odprta v drugem programu!", "Napaka pri shranjevanju");
+            MessageDialog message("Napaka pri shranjevanju, oseba ni shranjena! Preverite, če je baza odprta v drugem programu!");
             message.exec();
         }
         else
@@ -128,14 +152,56 @@ void PersonWidget::save(std::shared_ptr<Database> db)
     {
         try
         {
-            db->save_person(p);
+            _db->save_person(p);
             MessageDialog message("Podatki o osebi uspešno posodobljeni!");
             message.exec();
         }
         catch(std::logic_error&)
         {
-            MessageDialog message("Napaka pri shranjevanju, oseba ni shranjena! Preverite, če je baza odprta v drugem programu!", "Napaka pri shranjevanju");
+            MessageDialog message("Napaka pri shranjevanju, oseba ni shranjena! Preverite, če je baza odprta v drugem programu!");
             message.exec();
         }
     }
+}
+
+void PersonWidget::paintEvent(QPaintEvent *)
+{
+    QStyleOption opt;
+    opt.init(this);
+    QPainter p(this);
+    style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
+}
+
+void PersonWidget::on_add_event_button_clicked()
+{
+    if(_db!=NULL)
+    {
+        OpenEventDialog e(_db);
+        if(e.exec())
+        {
+            std::vector<EventEntity> events = e.event();
+            for(auto it = events.begin(); it!=events.end(); ++it)
+            {
+                QListWidgetItem *item = new QListWidgetItem();
+                item->setSizeHint(QSize(item->sizeHint().width(), 30));
+                ui->events_list->addItem(item);
+                ui->events_list->setItemWidget(item, new EventAttendanceWidget(*it, false, ui->events_list));
+            }
+        }
+    }
+}
+
+void PersonWidget::on_remove_event_button_clicked()
+{
+    qDeleteAll(ui->events_list->selectedItems());
+}
+
+void PersonWidget::on_remove_category_button_clicked()
+{
+    qDeleteAll(ui->role_list->selectedItems());
+}
+
+QColor PersonWidget::color()
+{
+    return QColor(113, 10, 6);
 }

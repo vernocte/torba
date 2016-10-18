@@ -29,6 +29,12 @@ public:
     // #### default constructor
     explicit EventBaseEntity();
 
+    // #### index constructor
+    explicit EventBaseEntity(int idx);
+
+    // #### values constructor
+    explicit EventBaseEntity(int idx, const QString& name, const QString& type);
+
     // ### accessors
 
     /*

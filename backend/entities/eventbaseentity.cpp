@@ -7,6 +7,14 @@
 EventBaseEntity::EventBaseEntity() :
     _idx(0), _name(), _type() { }
 
+// #### index constructor
+EventBaseEntity::EventBaseEntity(int idx) :
+    _idx(idx), _name(), _type() { }
+
+// #### values constructor
+EventBaseEntity::EventBaseEntity(int idx, const QString& name, const QString& type) :
+    _idx(idx), _name(name), _type(type) { }
+
 // ### accessors
 
 /*

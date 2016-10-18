@@ -122,13 +122,14 @@ void MainWindow::open_database()
             _connected &= false;
         }
     }
+    ui->main_widget->database(_db);
 }
 
 void MainWindow::save()
 {
     if(_connected)
     {
-        ui->main_widget->save(_db);
+        ui->main_widget->save();
     }
     else
     {
@@ -141,7 +142,7 @@ void MainWindow::save_as()
 {
     if(_connected)
     {
-        ui->main_widget->save_as(_db);
+        ui->main_widget->save_as();
     }
     else
     {
@@ -154,7 +155,7 @@ void MainWindow::save_all()
 {
     if(_connected)
     {
-        ui->main_widget->save_all(_db);
+        ui->main_widget->save_all();
     }
     else
     {
@@ -167,7 +168,7 @@ void MainWindow::emit_open_person()
 {
     if(_connected)
     {
-        OpenPersonDialog* person_dialog = new OpenPersonDialog(_db);
+        OpenPersonDialog* person_dialog = new OpenPersonDialog(_db, true);
         if(person_dialog->exec())
         {
             std::vector<PersonEntity> p = person_dialog->person();
@@ -209,7 +210,7 @@ void MainWindow::delete_person()
 {
     if(_connected)
     {
-        OpenPersonDialog* person_dialog = new OpenPersonDialog(_db);
+        OpenPersonDialog* person_dialog = new OpenPersonDialog(_db, false);
         if(person_dialog->exec())
         {
             std::vector<int> selected = person_dialog->index();

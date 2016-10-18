@@ -1,6 +1,8 @@
 #ifndef DATABASE_HPP
 #define DATABASE_HPP
 
+#include<memory>
+
 #include <QtSql>
 #include <QString>
 
@@ -8,39 +10,95 @@
 #include "entities/evententity.hpp"
 #include "logger.hpp"
 
-#include<memory>
-
+// # Database
 class Database
 {
+    // ## Private
 private:
 
+    // ### Fields
+
+    // #### Sqlite Database
     QSqlDatabase _db;
+
+    // #### Logger
     std::shared_ptr<Logger> _logger;
+
+    // #### Folder for database
     QString _folder;
 
+    // ### Private functions
+
+    // #### Create database
     void create_database();
 
 public:
 
+    // ### Constructors
+
+    // #### File and logger constructor
     Database(QString path, std::shared_ptr<Logger> &logger);
 
+    // ### Destructor
     ~Database();
 
-    void save_person(PersonEntity p);
-    PersonEntity get_person(int idx);
-    int insert_person(PersonEntity p);
-    std::vector<PersonBaseEntity> person_list();
+    // ### Accessors
+
+    /*
+    #### Folder
+
+    [returns]: folder database is in
+    */
+    QString folder() const;
+
+    // ### Person functions
+
+    /*
+    #### insert person
+
+    [p]: person to insert
+    [returns]: index of inserted person
+    */
+    int insert_person(const PersonEntity &p);
+
+    /*
+    #### delete person
+
+    [p]: person to insert
+    [returns]: index of inserted person
+    */
     void delete_person(int idx);
 
+    /*
+    #### save person
+
+    [p]: person to save
+    */
+    void save_person(const PersonEntity &p);
+
+    /*
+    #### get person
+
+    [idx]: index of person
+    [returns]: person with given index
+    */
+    PersonEntity get_person(int idx);
+
+    /*
+    #### get list of persons
+
+    [idx]: index of person
+    [returns]: person with given index
+    */
+    std::vector<PersonBaseEntity> person_list();
+
+    // ### Event functions
     void save_event(EventEntity e);
     EventEntity get_event(int idx);
     int insert_event(EventEntity e);
     std::vector<EventBaseEntity> event_list();
     void delete_event(int idx);
 
-    void insert_role(QString val);
-
-    QString folder();
 };
 
 #endif // DATABASE_HPP

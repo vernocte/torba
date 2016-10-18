@@ -3,10 +3,11 @@
 
 #include <QRegExp>
 
-OpenPersonDialog::OpenPersonDialog(std::shared_ptr<Database> &db, QWidget *parent) :
+OpenPersonDialog::OpenPersonDialog(std::shared_ptr<Database> &db, bool allow_new, QWidget *parent) :
     QDialog(parent), ui(new Ui::OpenPersonDialog), _db(db), _persons()
 {
     ui->setupUi(this);
+    if(!allow_new) ui->new_button->hide();
     _val = _db->person_list();
     for(uint i=0; i<_val.size(); ++i)
     {

@@ -12,7 +12,7 @@ class MessageDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit MessageDialog(const QString &message, const QString& title = "", QWidget *parent = 0);
+    explicit MessageDialog(const QString &message, QWidget *parent = 0);
     ~MessageDialog();
 
 private slots:

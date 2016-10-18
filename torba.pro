@@ -37,7 +37,9 @@ SOURCES += main.cpp\
     backend/entities/eventbaseentity.cpp \
     backend/entities/evententity.cpp \
     backend/logger.cpp \
-    gui/dialogs/messagedialog.cpp
+    gui/dialogs/messagedialog.cpp \
+    gui/subwidgets/eventattendancewidget.cpp \
+    gui/subwidgets/maintabwidget.cpp
 
 HEADERS  += \
     gui/mainwindow.hpp \
@@ -64,7 +66,10 @@ HEADERS  += \
     backend/entities/personentity.hpp \
     backend/entities/eventbaseentity.hpp \
     backend/logger.hpp \
-    gui/dialogs/messagedialog.hpp
+    gui/dialogs/messagedialog.hpp \
+    gui/subwidgets/eventattendancewidget.hpp \
+    backend/exceptions/databaseexception.hpp \
+    gui/subwidgets/maintabwidget.hpp
 
 FORMS    += gui/mainwindow.ui \
     gui/main_widget/mainwidget.ui \
@@ -76,7 +81,8 @@ FORMS    += gui/mainwindow.ui \
     gui/bottom_bar/bottombar.ui \
     gui/dialogs/openpersondialog.ui \
     gui/dialogs/openeventdialog.ui \
-    gui/dialogs/messagedialog.ui
+    gui/dialogs/messagedialog.ui \
+    gui/subwidgets/eventattendancewidget.ui
 
 RESOURCES += \
     resources/resources.qrc

@@ -17,6 +17,7 @@ public:
     void display(QString msg, bool err);
 private:
     Ui::BottomBar *ui;
+    void paintEvent(QPaintEvent *);
 };
 
 #endif // BOTTOMBAR_HPP

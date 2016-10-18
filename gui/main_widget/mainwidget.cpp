@@ -3,6 +3,7 @@
 #include "personwidget.hpp"
 #include "eventwidget.hpp"
 #include "mailfilter.hpp"
+#include <QPainter>
 
 MainWidget::MainWidget(QWidget *parent) :
     QWidget(parent),
@@ -26,7 +27,7 @@ void MainWidget::close_file(int index)
 
 void MainWidget::new_person(PersonEntity p)
 {
-    PersonWidget* person = new PersonWidget(p);
+    PersonWidget* person = new PersonWidget(_db, p);
     connect(person, SIGNAL(base_text(QString)), this, SLOT(change_text(QString)));
     ui->main_widget->addTab(person, "Nova oseba");
     ui->main_widget->setCurrentWidget(person);
@@ -34,7 +35,7 @@ void MainWidget::new_person(PersonEntity p)
 
 void MainWidget::new_event(EventEntity e)
 {
-    EventWidget* event = new EventWidget(e);
+    EventWidget* event = new EventWidget(_db, e);
     connect(event, SIGNAL(base_text(QString)), this, SLOT(change_text(QString)));
     ui->main_widget->addTab(event, "Nov dogodek");
     ui->main_widget->setCurrentWidget(event);
@@ -52,27 +53,27 @@ void MainWidget::change_text(QString val)
     ui->main_widget->setTabText(ui->main_widget->currentIndex() ,val);
 }
 
-void MainWidget::save(std::shared_ptr<Database> &db)
+void MainWidget::save()
 {
-    ((EditorBase*)ui->main_widget->currentWidget())->save(db);
+    ((EditorBase*)ui->main_widget->currentWidget())->save();
 }
 
-void MainWidget::save_as(std::shared_ptr<Database> &db)
+void MainWidget::save_as()
 {
-    ((EditorBase*)ui->main_widget->currentWidget())->save_as(db);
+    ((EditorBase*)ui->main_widget->currentWidget())->save_as();
 }
 
-void MainWidget::save_all(std::shared_ptr<Database> &db)
+void MainWidget::save_all()
 {
     for(int i=0; i<ui->main_widget->count(); ++i)
     {
-        ((EditorBase*)ui->main_widget->widget(i))->save(db);
+        ((EditorBase*)ui->main_widget->widget(i))->save();
     }
 }
 
 void MainWidget::open_person(const PersonEntity& p)
 {
-    PersonWidget* person = new PersonWidget(p);
+    PersonWidget* person = new PersonWidget(_db, p);
     connect(person, SIGNAL(base_text(QString)), this, SLOT(change_text(QString)));
     ui->main_widget->addTab(person, p.name() + " " + p.surname());
     ui->main_widget->setCurrentWidget(person);
@@ -80,8 +81,21 @@ void MainWidget::open_person(const PersonEntity& p)
 
 void MainWidget::open_event(const EventEntity& e)
 {
-    EventWidget* event = new EventWidget(e);
+    EventWidget* event = new EventWidget(_db, e);
     connect(event, SIGNAL(base_text(QString)), this, SLOT(change_text(QString)));
     ui->main_widget->addTab(event, e.name() + " " + e.type());
     ui->main_widget->setCurrentWidget(event);
+}
+
+void MainWidget::paintEvent(QPaintEvent *)
+{
+    QStyleOption opt;
+    opt.init(this);
+    QPainter p(this);
+    style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
+}
+
+void MainWidget::database(std::shared_ptr<Database> db)
+{
+    _db = db;
 }

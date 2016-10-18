@@ -1,6 +1,7 @@
 #ifndef EVENTENTITY_HPP
 #define EVENTENTITY_HPP
 
+#include<vector>
 // parent
 #include "eventbaseentity.hpp"
 
@@ -96,7 +97,7 @@ public:
 
     [returns]: reference to participants
     */
-    std::vector<PersonBaseEntity>& participants();
+    std::vector<PersonBaseEntity> &participants();
 };
 
 #endif // EVENTENTITY_HPP
