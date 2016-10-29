@@ -31,6 +31,8 @@ private slots:
     void on_remove_event_button_clicked();
     void on_remove_category_button_clicked();
 
+    void on_add_category_button_clicked();
+
 private:
     std::shared_ptr<Database> _db;
     Ui::PersonWidget *ui;

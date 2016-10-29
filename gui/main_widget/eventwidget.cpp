@@ -1,8 +1,12 @@
 #include "eventwidget.hpp"
 #include "ui_eventwidget.h"
+
+#include <string>
+
 #include <QPainter>
 
 #include "../dialogs/messagedialog.hpp"
+#include "../dialogs/openpersondialog.hpp"
 
 EventWidget::EventWidget(std::shared_ptr<Database> db, EventEntity e, QWidget *parent) :
     EditorBase(parent),
@@ -13,21 +17,15 @@ EventWidget::EventWidget(std::shared_ptr<Database> db, EventEntity e, QWidget *p
     ui->from_edit->setDate(e.start_date());
     ui->number_label->setText(QString::number(e.idx()));
     ui->name_edit->setText(e.name());
-    if(e.name() == "")
-    {
-        ui->name_edit->setStyleSheet("color: white;"
-                "background-color: rgb(40,40,40);"
-                "border: 2px solid red;"
-        );
-    }
     ui->to_edit->setDate(e.end_date());
     ui->type_edit->setText(e.type());
-    if(e.type() == "")
+    for(auto it=e.leaders().begin(); it!=e.leaders().end(); ++it)
     {
-        ui->type_edit->setStyleSheet("color: white;"
-                "background-color: rgb(40,40,40);"
-                "border: 2px solid red;"
-        );
+        ui->leaders_list->addItem(QString::number(it->idx()) + "\t" + it->name() + "\t" + it->surname());
+    }
+    for(auto it=e.participants().begin(); it!=e.participants().end(); ++it)
+    {
+        ui->participants_list->addItem(QString::number(it->idx()) + "\t" + it->name() + "\t" + it->surname());
     }
 }
 
@@ -70,6 +68,18 @@ void EventWidget::save()
     e.type(ui->type_edit->text());
     e.start_date(ui->from_edit->date());
     e.end_date(ui->to_edit->date());
+    for(int i=0; i<ui->participants_list->count(); ++i)
+    {
+        PersonBaseEntity p;
+        p.idx(std::stoi(ui->participants_list->item(i)->text().toStdString()));
+        e.participants().emplace_back(p);
+    }
+    for(int i=0; i<ui->leaders_list->count(); ++i)
+    {
+        PersonBaseEntity p;
+        p.idx(std::stoi(ui->leaders_list->item(i)->text().toStdString()));
+        e.leaders().emplace_back(p);
+    }
 
     if(e.idx()==0)
     {
@@ -121,4 +131,52 @@ void EventWidget::paintEvent(QPaintEvent *)
 QColor EventWidget::color()
 {
     return Qt::blue;
+}
+
+void EventWidget::on_add_participant_button_clicked()
+{
+    std::vector<PersonEntity> persons;
+    OpenPersonDialog p(_db, true);
+    if(p.exec())
+    {
+        persons = p.person();
+    }
+    if(persons.size()==1 && persons[0].idx()==0)
+    {
+        persons[0].participated().emplace_back(EventBaseEntity(ui->number_label->text().toInt(), ui->name_edit->text(),ui->type_edit->text()));
+        emit open_new_person(persons[0]);
+    }
+    for(auto it = persons.begin(); it!=persons.end(); ++it)
+    {
+        ui->participants_list->addItem(QString::number(it->idx()) + "\t" + it->name() + "\t" + it->surname());
+    }
+}
+
+void EventWidget::on_remove_person_button_clicked()
+{
+    qDeleteAll(ui->participants_list->selectedItems());
+}
+
+void EventWidget::on_remove_leader_button_clicked()
+{
+    qDeleteAll(ui->leaders_list->selectedItems());
+}
+
+void EventWidget::on_add_leader_button_clicked()
+{
+    std::vector<PersonEntity> persons;
+    OpenPersonDialog p(_db, true);
+    if(p.exec())
+    {
+        persons = p.person();
+    }
+    if(persons.size()==1 && persons[0].idx()==0)
+    {
+        persons[0].lead().emplace_back(EventBaseEntity(ui->number_label->text().toInt(), ui->name_edit->text(),ui->type_edit->text()));
+        emit open_new_person(persons[0]);
+    }
+    for(auto it = persons.begin(); it!=persons.end(); ++it)
+    {
+        ui->leaders_list->addItem(QString::number(it->idx()) + "\t" + it->name() + "\t" + it->surname());
+    }
 }

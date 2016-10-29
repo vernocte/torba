@@ -54,6 +54,9 @@ private:
     // #### street number
     QString _street_number;
 
+    // #### roles
+    std::vector<QString> _roles;
+
     // #### participated
     std::vector<EventBaseEntity> _participated;
 
@@ -251,6 +254,20 @@ public:
     [returns]: const reference to lead vector
     */
     const std::vector<EventBaseEntity>& lead() const;
+
+    /*
+    #### gets or sets roles
+
+    [returns]: reference to roles vector
+    */
+    std::vector<QString>& roles();
+
+    /*
+    #### gets roles
+
+    [returns]: const reference to roles vector
+    */
+    const std::vector<QString>& roles() const;
 };
 
 #endif // PERSON_HPP

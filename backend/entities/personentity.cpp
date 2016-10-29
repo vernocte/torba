@@ -16,6 +16,7 @@ PersonEntity::PersonEntity() : PersonBaseEntity(),
     _post(),
     _street(),
     _street_number(),
+    _roles(),
     _participated(),
     _lead() { }
 
@@ -281,4 +282,24 @@ std::vector<EventBaseEntity>& PersonEntity::lead()
 const std::vector<EventBaseEntity>& PersonEntity::lead() const
 {
     return _lead;
+}
+
+/*
+#### gets or sets roles
+
+[returns]: reference to roles vector
+*/
+std::vector<QString>& PersonEntity::roles()
+{
+    return _roles;
+}
+
+/*
+#### gets roles
+
+[returns]: const reference to roles vector
+*/
+const std::vector<QString>& PersonEntity::roles() const
+{
+    return _roles;
 }

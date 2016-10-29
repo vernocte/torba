@@ -99,6 +99,21 @@ public:
     std::vector<EventBaseEntity> event_list();
     void delete_event(int idx);
 
+    // ### category
+
+    /*
+    #### categories list
+
+    [returns]: vector containing all categories
+    */
+    QStringList categories_list();
+
+    /*
+    #### add category
+
+    [category]: category to add
+    */
+    void add_category(const QString& category);
 };
 
 #endif // DATABASE_HPP

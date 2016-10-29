@@ -198,7 +198,7 @@ int Database::insert_person(const PersonEntity &p)
     }
 
     // insert person data
-    query.prepare("INSERT INTO person_data (idx_person, idx_property, value) VALUES"
+    query.prepare("INSERT INTO person_data (idx_person, idx_property, value) values"
                   "(:idx, 1, :birthday),"
                   "(:idx, 2, :birthplace),"
                   "(:idx, 3, :email),"
@@ -228,6 +228,18 @@ int Database::insert_person(const PersonEntity &p)
         throw DatabaseException("insert", "person_data", query.lastError().text().toStdString());
     }
 
+    // roles
+    for(auto it = p.roles().begin(); it!=p.roles().end(); ++it)
+    {
+        query.prepare("insert into person_data (idx_person, idx_property, value) values (:idx, 12, (select idx from role where value = :value))");
+        query.bindValue(":idx", p.idx());
+        query.bindValue(":value", *it);
+        if(!query.exec())
+        {
+            throw DatabaseException("insert", "person_data", query.lastError().text().toStdString());
+        }
+    }
+
     // attendance
     for(auto it=p.lead().begin(); it!=p.lead().end(); ++it)
     {
@@ -249,6 +261,7 @@ int Database::insert_person(const PersonEntity &p)
             throw DatabaseException("insert", "attendance", query.lastError().text().toStdString());
         }
     }
+
     _db.close();
     return idx;
 }
@@ -336,6 +349,9 @@ PersonEntity Database::get_person(int idx)
     }
 
     // person_data
+
+    std::vector<int> role_idx;
+
     query.prepare("select idx_property, value from person_data where idx_person = :idx;");
     query.bindValue(":idx", idx);
     if(!query.exec())
@@ -379,12 +395,30 @@ PersonEntity Database::get_person(int idx)
         case 11:
             p.comment(query.value(1).toString());
             break;
+        case 12:
+            role_idx.emplace_back(query.value(1).toInt());
+            break;
         default:
             throw DatabaseException("select", "person_data", "Unrecognised index: " + query.value(0).toString().toStdString());
         }
     }
 
-    // attendance attending
+    // roles
+    for(auto it=role_idx.begin(); it!=role_idx.end(); ++it)
+    {
+        query.prepare("select value from role where idx = :idx;");
+        query.bindValue(":idx", *it);
+        if(!query.exec())
+        {
+            throw DatabaseException("select", "role", query.lastError().text().toStdString());
+        }
+        while (query.next())
+        {
+            p.roles().emplace_back(query.value(0).toString());
+        }
+    }
+
+    // attendance
     query.prepare("select idx, name, type from event where idx in (select idx_event from attendance where idx_person = :idx_person and leader = 0);");
     query.bindValue(":idx_person", p.idx());
     if(!query.exec())
@@ -405,7 +439,6 @@ PersonEntity Database::get_person(int idx)
     }
     while (query.next())
     {
-        qDebug() << "lead";
         p.lead().emplace_back(EventBaseEntity(query.value(0).toInt(), query.value(1).toString(), query.value(2).toString()));
     }
 
@@ -444,36 +477,8 @@ std::vector<PersonBaseEntity> Database::person_list()
 
 void Database::save_event(EventEntity e)
 {
-    _db.open();
-    QSqlQuery query;
-    query.prepare("update event set name = :name, type= :type where idx = :idx;");
-    query.bindValue(":name", e.name());
-    query.bindValue(":type", e.type());
-    query.bindValue(":idx", e.idx());
-    if(!query.exec())
-    {
-        throw DatabaseException("update", "event", query.lastError().text().toStdString());
-    }
-    query.prepare("delete from event_data where idx_event = :idx;");
-    query.bindValue(":idx", e.idx());
-    if(!query.exec())
-    {
-        throw DatabaseException("delete", "event_data", query.lastError().text().toStdString());
-    }
-    query.prepare("insert into event_data (idx_event, idx_property, value) VALUES"
-                  "(:idx, 1, :start_date),"
-                  "(:idx, 2, :end_date),"
-                  "(:idx, 3, :comment);");
-    query.bindValue(":idx", e.idx());
-    query.bindValue(":start_date", e.start_date().toString("yyyy-MM-dd"));
-    query.bindValue(":end_date", e.end_date().toString("yyyy-MM-dd"));
-    query.bindValue(":comment", e.comment());
-
-    if(!query.exec())
-    {
-        throw DatabaseException("insert", "event_data", query.lastError().text().toStdString());
-    }
-    _db.close();
+    delete_event(e.idx());
+    insert_event(e);
 }
 
 EventEntity Database::get_event(int idx)
@@ -514,6 +519,31 @@ EventEntity Database::get_event(int idx)
             break;
         }
     }
+
+    // attendance
+    query.prepare("select idx, name, surname from person where idx in (select idx_person from attendance where idx_event = :idx_event and leader = 0);");
+    query.bindValue(":idx_event", e.idx());
+    if(!query.exec())
+    {
+        throw DatabaseException("select", "attendance", query.lastError().text().toStdString());
+    }
+    while (query.next())
+    {
+        e.participants().emplace_back(PersonBaseEntity(query.value(0).toInt(), query.value(1).toString(), query.value(2).toString()));
+    }
+
+    // attendance leading
+    query.prepare("select idx, name, surname from person where idx in (select idx_person from attendance where idx_event = :idx_event and leader = 1);");
+    query.bindValue(":idx_event", e.idx());
+    if(!query.exec())
+    {
+        throw DatabaseException("select", "attendance", query.lastError().text().toStdString());
+    }
+    while (query.next())
+    {
+        e.leaders().emplace_back(PersonBaseEntity(query.value(0).toInt(), query.value(1).toString(), query.value(2).toString()));
+    }
+
     _db.close();
     return e;
 }
@@ -522,44 +552,79 @@ int Database::insert_event(EventEntity e)
 {
     _db.open();
     QSqlQuery query;
-    query.prepare("insert into  event(name, type) VALUES(:name, :type);");
-    query.bindValue(":name", e.name());
-    query.bindValue(":type", e.type());
-    if(!query.exec())
-    {
-        throw DatabaseException("insert", "event", query.lastError().text().toStdString());
-    }
-    if(!query.exec("select last_insert_rowid();"))
-    {
-        throw DatabaseException("select", "last_insert_rowid", query.lastError().text().toStdString());
-    }
-    int idx = 0;
 
-    while (query.next())
+    if(e.idx()==0)
     {
-        idx = query.value(0).toInt();
-    }
-    if(idx!=0)
-    {
-        query.prepare("insert into event_data (idx_event, idx_property, value) VALUES"
-                      "(:idx, 1, :start_date),"
-                      "(:idx, 2, :end_date),"
-                      "(:idx, 3, :comment);");
-        query.bindValue(":idx", idx);
-        query.bindValue(":start_date", e.start_date().toString("yyyy-MM-dd"));
-        query.bindValue(":end_date", e.end_date().toString("yyyy-MM-dd"));
-        query.bindValue(":comment", e.comment());
+        query.prepare("insert into  event(name, type) VALUES(:name, :type);");
+        query.bindValue(":name", e.name());
+        query.bindValue(":type", e.type());
         if(!query.exec())
         {
-            throw DatabaseException("insert", "event_data", query.lastError().text().toStdString());
+            throw DatabaseException("insert", "event", query.lastError().text().toStdString());
         }
+        if(!query.exec("select last_insert_rowid();"))
+        {
+            throw DatabaseException("select", "last_insert_rowid", query.lastError().text().toStdString());
+        }
+        int idx = 0;
+
+        while (query.next())
+        {
+            idx = query.value(0).toInt();
+        }
+        if(idx!=0) e.idx(idx);
+        else throw DatabaseException("select", "index", "");
     }
     else
     {
-        throw DatabaseException("select", "last_insert_rowid", query.lastError().text().toStdString());
+        query.prepare("insert into  event(idx, name, type) VALUES(:idx, :name, :type);");
+        query.bindValue(":idx", e.idx());
+        query.bindValue(":name", e.name());
+        query.bindValue(":type", e.type());
+        if(!query.exec())
+        {
+            throw DatabaseException("insert", "event", query.lastError().text().toStdString());
+        }
     }
+
+    query.prepare("insert into event_data (idx_event, idx_property, value) VALUES"
+                  "(:idx, 1, :start_date),"
+                  "(:idx, 2, :end_date),"
+                  "(:idx, 3, :comment);");
+    query.bindValue(":idx", e.idx());
+    query.bindValue(":start_date", e.start_date().toString("yyyy-MM-dd"));
+    query.bindValue(":end_date", e.end_date().toString("yyyy-MM-dd"));
+    query.bindValue(":comment", e.comment());
+    if(!query.exec())
+    {
+        throw DatabaseException("insert", "event_data", query.lastError().text().toStdString());
+    }
+
+    // attendance
+    for(auto it=e.leaders().begin(); it!=e.leaders().end(); ++it)
+    {
+        query.prepare("insert into attendance(idx_person, idx_event, leader) values (:idx_person, :idx, 1)");
+        query.bindValue(":idx_person", it->idx());
+        query.bindValue(":idx", e.idx());
+        if(!query.exec())
+        {
+            throw DatabaseException("insert", "attendance", query.lastError().text().toStdString());
+        }
+    }
+    for(auto it=e.participants().begin(); it!=e.participants().end(); ++it)
+    {
+        query.prepare("insert into attendance(idx_person, idx_event, leader) values (:idx_person, :idx, 0)");
+        query.bindValue(":idx_person", it->idx());
+        query.bindValue(":idx", e.idx());
+        if(!query.exec())
+        {
+            throw DatabaseException("insert", "attendance", query.lastError().text().toStdString());
+        }
+    }
+
     _db.close();
-    return idx;
+
+    return e.idx();
 }
 
 std::vector<EventBaseEntity> Database::event_list()
@@ -598,6 +663,49 @@ void Database::delete_event(int idx)
     if(!query.exec())
     {
         throw DatabaseException("select", "attendance", query.lastError().text().toStdString());
+    }
+    _db.close();
+}
+
+// ### category
+
+/*
+#### categories list
+
+[returns]: vector containing all categories
+*/
+QStringList Database::categories_list()
+{
+    _db.open();
+    QSqlQuery query;
+
+    QStringList roles;
+    if(!query.exec("select value from role;"))
+    {
+        throw DatabaseException("select", "role", query.lastError().text().toStdString());
+    }
+    while(query.next())
+    {
+        roles.append(query.value(0).toString());
+    }
+    _db.close();
+    return roles;
+}
+
+/*
+#### add category
+
+[category]: category to add
+*/
+void Database::add_category(const QString& category)
+{
+    _db.open();
+    QSqlQuery query;
+    query.prepare("insert into role (value) values (:category)");
+    query.bindValue(":category", category);
+    if(!query.exec())
+    {
+        throw DatabaseException("insert", "role", query.lastError().text().toStdString());
     }
     _db.close();
 }

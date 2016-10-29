@@ -5,6 +5,7 @@
 #include "../dialogs/openeventdialog.hpp"
 #include "../../backend/entities/evententity.hpp"
 #include "../subwidgets/eventattendancewidget.hpp"
+#include "../dialogs/categorydialog.hpp"
 
 #include <QPainter>
 
@@ -53,6 +54,11 @@ PersonWidget::PersonWidget(std::shared_ptr<Database> db, PersonEntity p, QWidget
         item->setSizeHint(QSize(item->sizeHint().width(), 30));
         ui->events_list->addItem(item);
         ui->events_list->setItemWidget(item, new EventAttendanceWidget(*it, false, ui->events_list));
+    }
+
+    for(auto it=p.roles().begin(); it!=p.roles().end(); ++it)
+    {
+        ui->role_list->addItem(*it);
     }
 }
 
@@ -133,6 +139,10 @@ void PersonWidget::save()
         if(attendance.second) p.lead().emplace_back(EventBaseEntity(attendance.first));
         else p.participated().emplace_back(EventBaseEntity(attendance.first));
     }
+    for(int i=0; i<ui->role_list->count(); ++i)
+    {
+        p.roles().emplace_back(ui->role_list->item(i)->text());
+    }
 
     if(p.idx()==0)
     {
@@ -204,4 +214,13 @@ void PersonWidget::on_remove_category_button_clicked()
 QColor PersonWidget::color()
 {
     return QColor(113, 10, 6);
+}
+
+void PersonWidget::on_add_category_button_clicked()
+{
+    CategoryDialog c(_db);
+    if(c.exec())
+    {
+        ui->role_list->addItems(c.selected());
+    }
 }
