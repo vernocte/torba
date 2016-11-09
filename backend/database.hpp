@@ -25,7 +25,7 @@ private:
     std::shared_ptr<Logger> _logger;
 
     // #### Folder for database
-    QString _folder;
+    QString _path;
 
     // ### Private functions
 
@@ -50,6 +50,7 @@ public:
     [returns]: folder database is in
     */
     QString folder() const;
+    QString path() const;
 
     // ### Person functions
 
@@ -114,6 +115,8 @@ public:
     [category]: category to add
     */
     void add_category(const QString& category);
+
+    void export_database(const std::vector<int>& index, const QString& path);
 };
 
 #endif // DATABASE_HPP

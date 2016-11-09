@@ -12,6 +12,9 @@ public:
     virtual void save() = 0;
     virtual void save_as() = 0;
     virtual QColor color() = 0;
+    virtual QString type() = 0;
+    virtual int idx() = 0;
+    virtual bool dirty() = 0;
 
 signals:
     void base_text(QString);

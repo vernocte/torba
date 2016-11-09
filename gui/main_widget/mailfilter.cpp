@@ -34,5 +34,19 @@ void MailFilter::paintEvent(QPaintEvent *)
 
 QColor MailFilter::color()
 {
-    return Qt::yellow;
+    return QColor(152,70,14);
+}
+
+QString MailFilter::type()
+{
+    return "filter";
+}
+int MailFilter::idx()
+{
+    return 0;
+}
+
+bool MailFilter::dirty()
+{
+    return false;
 }

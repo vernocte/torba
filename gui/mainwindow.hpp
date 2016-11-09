@@ -24,6 +24,9 @@ public:
 signals:
     void open_person(PersonEntity);
     void open_event(EventEntity);
+    void new_person();
+    void new_event();
+    void new_filter();
 
 private slots:
     void save_settings();
@@ -33,10 +36,14 @@ private slots:
     void save();
     void save_as();
     void save_all();
+    void emit_new_person();
+    void emit_new_event();
+    void emit_new_filter();
     void emit_open_person();
     void emit_open_event();
     void delete_person();
     void delete_event();
+    void export_database();
 
 private:
 

@@ -42,10 +42,10 @@ ImportDatabase::~ImportDatabase()
 
 void ImportDatabase::on_import_database_button_clicked()
 {
-
+    emit import_database();
 }
 
 void ImportDatabase::on_export_database_button_clicked()
 {
-
+    emit export_database();
 }

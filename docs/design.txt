@@ -1,0 +1,5 @@
+TODO:
+
+EventWidget alignment
+choice dialog alignment
+Colors and design notes in design.txt

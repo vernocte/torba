@@ -10,6 +10,11 @@
     <height>167</height>
    </rect>
   </property>
+  <property name="font">
+   <font>
+    <pointsize>12</pointsize>
+   </font>
+  </property>
   <property name="windowTitle">
    <string/>
   </property>
@@ -22,7 +27,7 @@ background-color: rgb(80,80,80);</string>
     <widget class="QLabel" name="message_label">
      <property name="font">
       <font>
-       <pointsize>11</pointsize>
+       <pointsize>12</pointsize>
        <italic>false</italic>
       </font>
      </property>

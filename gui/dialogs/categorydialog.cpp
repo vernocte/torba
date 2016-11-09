@@ -7,9 +7,9 @@ CategoryDialog::CategoryDialog(std::shared_ptr<Database> &db, QWidget *parent) :
 {
     ui->setupUi(this);
     _db = db;
-
     _categories = _db->categories_list();
     ui->categories_list->addItems(_categories);
+    if(!_categories.empty()) ui->categories_list->setCurrentRow(0);
 }
 
 CategoryDialog::~CategoryDialog()

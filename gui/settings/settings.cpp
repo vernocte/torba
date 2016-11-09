@@ -81,6 +81,12 @@ Settings::Settings(QWidget *parent) :
     connect(ui->save_widget_event, SIGNAL(save_all()), this, SLOT(emit_save_all()));
     connect(ui->save_widget_fav, SIGNAL(save_all()), this, SLOT(emit_save_all()));
 
+    connect(ui->import_database, SIGNAL(import_database()), this, SLOT(emit_import_database()));
+    connect(ui->import_database_fav, SIGNAL(import_database()), this, SLOT(emit_import_database()));
+
+    connect(ui->import_database, SIGNAL(export_database()), this, SLOT(emit_export_database()));
+    connect(ui->import_database_fav, SIGNAL(export_database()), this, SLOT(emit_export_database()));
+
     ui->settings_stack->setCurrentIndex(0);
 }
 
@@ -267,4 +273,15 @@ void Settings::on_find_button_clicked()
         ui->settings_stack->show();
         ui->settings_stack->setCurrentIndex(4);
     }
+}
+
+
+void Settings::emit_import_database()
+{
+    emit import_database();
+}
+
+void Settings::emit_export_database()
+{
+    emit export_database();
 }

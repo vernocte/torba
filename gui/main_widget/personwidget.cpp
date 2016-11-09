@@ -6,6 +6,7 @@
 #include "../../backend/entities/evententity.hpp"
 #include "../subwidgets/eventattendancewidget.hpp"
 #include "../dialogs/categorydialog.hpp"
+#include "../dialogs/choicedialog.hpp"
 
 #include <QPainter>
 
@@ -16,19 +17,7 @@ PersonWidget::PersonWidget(std::shared_ptr<Database> db, PersonEntity p, QWidget
     ui->setupUi(this);
     ui->number_label->setText(QString::number(p.idx()));
     ui->name_edit->setText(p.name());
-    if(p.name() == "")
-    {
-        ui->name_edit->setStyleSheet("color: white;"
-                "background-color: rgb(40,40,40);"
-        );
-    }
     ui->surname_edit->setText(p.surname());
-    if(p.surname() == "")
-    {
-        ui->surname_edit->setStyleSheet("color: white;"
-                "background-color: rgb(40,40,40);"
-        );
-    }
     ui->birth_date_edit->setDate(p.birthday());
     ui->mail_edit->setText(p.email());
     ui->phone_edit->setText(p.phone());
@@ -42,7 +31,6 @@ PersonWidget::PersonWidget(std::shared_ptr<Database> db, PersonEntity p, QWidget
     ui->country_edit->setText(p.country());
     for(auto it=p.lead().begin(); it!=p.lead().end(); ++it)
     {
-        qDebug() << "lead";
         QListWidgetItem *item = new QListWidgetItem();
         item->setSizeHint(QSize(item->sizeHint().width(), 30));
         ui->events_list->addItem(item);
@@ -60,6 +48,7 @@ PersonWidget::PersonWidget(std::shared_ptr<Database> db, PersonEntity p, QWidget
     {
         ui->role_list->addItem(*it);
     }
+    _dirty = false;
 }
 
 PersonWidget::~PersonWidget()
@@ -73,7 +62,7 @@ void PersonWidget::on_surname_edit_textChanged(const QString)
     {
         ui->surname_edit->setStyleSheet("color: white;"
                 "background-color: rgb(40,40,40);"
-                "border: 2px solid red;"
+                "border: 2px solid rgb(113, 10, 6);"
         );
     }
     else
@@ -82,9 +71,7 @@ void PersonWidget::on_surname_edit_textChanged(const QString)
                 "background-color: rgb(40,40,40);"
         );
     }
-
-    QString text = ui->name_edit->text() + " " + ui->surname_edit->text();
-    emit base_text(text);
+    dirty(true);
 }
 
 void PersonWidget::on_name_edit_textChanged(const QString)
@@ -93,7 +80,7 @@ void PersonWidget::on_name_edit_textChanged(const QString)
     {
         ui->name_edit->setStyleSheet("color: white;"
                 "background-color: rgb(40,40,40);"
-                "border: 2px solid red;"
+                "border: 2px solid rgb(113, 10, 6);"
         );
     }
     else
@@ -102,17 +89,18 @@ void PersonWidget::on_name_edit_textChanged(const QString)
                 "background-color: rgb(40,40,40);"
         );
     }
-    QString text = ui->name_edit->text() + " " + ui->surname_edit->text();
-    emit base_text(text);
+    dirty(true);
 }
 
 void PersonWidget::save_as()
 {
     if(ui->name_edit->text()=="" || ui->surname_edit->text()=="") return;
-    MessageDialog message("Oseba bo shranjena pod novo številko, spremembe na originalni osebi ne bodo shranjene!");
-    message.exec();
-    ui->number_label->setText(0);
-    save();
+    ChoiceDialog message("Oseba bo shranjena pod novo številko, spremembe na originalni osebi ne bodo shranjene!");
+    if(message.exec())
+    {
+        ui->number_label->setText(0);
+        save();
+    }
 }
 
 void PersonWidget::save()
@@ -172,6 +160,9 @@ void PersonWidget::save()
             message.exec();
         }
     }
+    QString text = ui->name_edit->text() + " " + ui->surname_edit->text();
+    emit base_text(text);
+    dirty(false);
 }
 
 void PersonWidget::paintEvent(QPaintEvent *)
@@ -192,23 +183,38 @@ void PersonWidget::on_add_event_button_clicked()
             std::vector<EventEntity> events = e.event();
             for(auto it = events.begin(); it!=events.end(); ++it)
             {
+                emit add_person(it->idx(), PersonBaseEntity(ui->number_label->text().toInt(), ui->name_edit->text(), ui->surname_edit->text()), false);
                 QListWidgetItem *item = new QListWidgetItem();
                 item->setSizeHint(QSize(item->sizeHint().width(), 30));
                 ui->events_list->addItem(item);
                 ui->events_list->setItemWidget(item, new EventAttendanceWidget(*it, false, ui->events_list));
             }
+            dirty(true);
         }
     }
 }
 
 void PersonWidget::on_remove_event_button_clicked()
 {
-    qDeleteAll(ui->events_list->selectedItems());
+    if(!ui->events_list->selectedItems().empty())
+    {
+        for(int i=0; i<ui->events_list->selectedItems().count(); ++i)
+        {
+            emit remove_person(((EventAttendanceWidget*)ui->events_list->itemWidget(ui->events_list->selectedItems()[i]))->get().first,
+                               ui->number_label->text().toInt(), ((EventAttendanceWidget*)ui->events_list->itemWidget(ui->events_list->selectedItems()[i]))->get().second);
+        }
+        qDeleteAll(ui->events_list->selectedItems());
+        dirty(true);
+    }
 }
 
 void PersonWidget::on_remove_category_button_clicked()
 {
-    qDeleteAll(ui->role_list->selectedItems());
+    if(!ui->role_list->selectedItems().empty())
+    {
+        qDeleteAll(ui->role_list->selectedItems());
+        dirty(true);
+    }
 }
 
 QColor PersonWidget::color()
@@ -222,5 +228,107 @@ void PersonWidget::on_add_category_button_clicked()
     if(c.exec())
     {
         ui->role_list->addItems(c.selected());
+        dirty(true);
     }
+}
+
+QString PersonWidget::type()
+{
+    return "person";
+}
+int PersonWidget::idx()
+{
+    return ui->number_label->text().toInt();
+}
+
+bool PersonWidget::dirty()
+{
+    return _dirty;
+}
+
+void PersonWidget::dirty(bool val)
+{
+    if(_dirty!=val)
+    {
+        _dirty = val;
+        emit dirty_changed(_dirty);
+    }
+}
+
+void PersonWidget::on_sex_combobox_currentIndexChanged(const QString &)
+{
+    dirty(true);
+}
+
+void PersonWidget::on_street_edit_textChanged(const QString &)
+{
+    dirty(true);
+}
+
+void PersonWidget::on_street_number_edit_textChanged(const QString &)
+{
+    dirty(true);
+}
+
+void PersonWidget::on_postal_number_edit_valueChanged(const QString &)
+{
+    dirty(true);
+}
+
+void PersonWidget::on_post_edit_textChanged(const QString &)
+{
+    dirty(true);
+}
+
+void PersonWidget::on_country_edit_textChanged(const QString &)
+{
+    dirty(true);
+}
+
+void PersonWidget::on_birth_date_edit_dateChanged(const QDate &)
+{
+    dirty(true);
+}
+
+void PersonWidget::on_place_edit_textChanged(const QString &)
+{
+    dirty(true);
+}
+
+void PersonWidget::on_phone_edit_textChanged(const QString &)
+{
+    dirty(true);
+}
+
+void PersonWidget::on_mail_edit_textChanged(const QString &)
+{
+    dirty(true);
+}
+
+void PersonWidget::on_comments_edit_textChanged()
+{
+    dirty(true);
+}
+
+void PersonWidget::add_event(const EventBaseEntity& e, bool leader)
+{
+    QListWidgetItem *item = new QListWidgetItem();
+    item->setSizeHint(QSize(item->sizeHint().width(), 30));
+    ui->events_list->addItem(item);
+    ui->events_list->setItemWidget(item, new EventAttendanceWidget(e, leader, ui->events_list));
+
+    dirty(true);
+}
+
+void PersonWidget::remove_event(int idx)
+{
+    for(int i=0; i<ui->events_list->count(); ++i)
+    {
+        if(((EventAttendanceWidget*)ui->events_list->itemWidget(ui->events_list->item(i)))->get().first == idx)
+        {
+            delete ui->events_list->itemWidget(ui->events_list->item(i));
+            delete ui->events_list->takeItem(i);
+        }
+    }
+
 }

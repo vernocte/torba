@@ -3,6 +3,7 @@
 #include "exceptions/databaseexception.hpp"
 
 #include <QDebug>
+#include <sstream>
 
 // ### Private functions
 
@@ -118,7 +119,7 @@ void Database::create_database()
 
 // #### File and logger constructor
 Database::Database(QString path, std::shared_ptr<Logger> &logger) :
-    _db(QSqlDatabase::database()), _logger(logger), _folder(QFileInfo(path).absoluteDir().absolutePath())
+    _db(QSqlDatabase::database()), _logger(logger), _path(path)
 {
     bool create = !QFileInfo(path).exists();
     _db.setDatabaseName(path);
@@ -146,7 +147,17 @@ Database::~Database()
 */
 QString Database::folder() const
 {
-    return _folder;
+    return QFileInfo(_path).absoluteDir().absolutePath();
+}
+
+/*
+#### Folder
+
+[returns]: folder database is in
+*/
+QString Database::path() const
+{
+    return _path;
 }
 
 /*
@@ -160,7 +171,7 @@ int Database::insert_person(const PersonEntity &p)
     _db.open();
     QSqlQuery query;
 
-    int idx = 0;
+    int idx = p.idx();
     if(p.idx() == 0)
     {
         // insert person
@@ -194,7 +205,6 @@ int Database::insert_person(const PersonEntity &p)
         {
             throw DatabaseException("insert", "person", query.lastError().text().toStdString());
         }
-        idx = p.idx();
     }
 
     // insert person data
@@ -232,7 +242,7 @@ int Database::insert_person(const PersonEntity &p)
     for(auto it = p.roles().begin(); it!=p.roles().end(); ++it)
     {
         query.prepare("insert into person_data (idx_person, idx_property, value) values (:idx, 12, (select idx from role where value = :value))");
-        query.bindValue(":idx", p.idx());
+        query.bindValue(":idx", idx);
         query.bindValue(":value", *it);
         if(!query.exec())
         {
@@ -244,7 +254,7 @@ int Database::insert_person(const PersonEntity &p)
     for(auto it=p.lead().begin(); it!=p.lead().end(); ++it)
     {
         query.prepare("insert into attendance(idx_person, idx_event, leader) values (:idx, :idx_event, 1)");
-        query.bindValue(":idx", p.idx());
+        query.bindValue(":idx", idx);
         query.bindValue(":idx_event", it->idx());
         if(!query.exec())
         {
@@ -254,7 +264,7 @@ int Database::insert_person(const PersonEntity &p)
     for(auto it=p.participated().begin(); it!=p.participated().end(); ++it)
     {
         query.prepare("insert into attendance(idx_person, idx_event, leader) values (:idx, :idx_event, 0)");
-        query.bindValue(":idx", p.idx());
+        query.bindValue(":idx", idx);
         query.bindValue(":idx_event", it->idx());
         if(!query.exec())
         {
@@ -707,5 +717,74 @@ void Database::add_category(const QString& category)
     {
         throw DatabaseException("insert", "role", query.lastError().text().toStdString());
     }
+    _db.close();
+}
+
+QString vec_to_string(const std::vector<int>& vec)
+{
+    std::stringstream ss;
+    ss << "(";
+    std::string delim = "";
+    for(int i: vec)
+    {
+        ss<< delim << i;
+        delim = ", ";
+    }
+    ss << ")";
+    return QString::fromStdString(ss.str());
+}
+
+void Database::export_database(const std::vector<int>& index, const QString& path)
+{
+    _db.open();
+    QSqlQuery query;
+    query.prepare("attach :path as db");
+    query.bindValue(":path", path);
+    if(!query.exec())
+    {
+        throw DatabaseException("attach", "db", query.lastError().text().toStdString());
+    }
+    QString idx = vec_to_string(index);
+
+    query.prepare("insert into db.role(idx, value)"
+                  "select idx, value from role;");
+    if(!query.exec())
+    {
+        throw DatabaseException("insert", "event", query.lastError().text().toStdString());
+    }
+    query.prepare("insert into db.event(idx, name, type) select idx, name, type from event where idx in " + idx + ";");
+    if(!query.exec())
+    {
+        throw DatabaseException("insert", "event", query.lastError().text().toStdString());
+    }
+    query.prepare("insert into db.event_data(idx, idx_event, idx_property, value) "
+                  "select idx, idx_event, idx_property, value from event_data where idx_event in " + idx + ";");
+    if(!query.exec())
+    {
+        throw DatabaseException("insert", "event", query.lastError().text().toStdString());
+    }
+    query.prepare("insert into db.person(idx, name, surname) "
+                  "select idx, name, surname from person where idx in "
+                  "(select idx_person from attendance where idx_event in " + idx +");");
+    if(!query.exec())
+    {
+        throw DatabaseException("insert", "event", query.lastError().text().toStdString());
+    }
+
+    query.prepare("insert into db.person_data(idx, idx_person, idx_property, value) "
+                  "select idx, idx_person, idx_property, value from person_data where idx_person in "
+                  "(select idx_person from attendance where idx_event in " + idx +");");
+    if(!query.exec())
+    {
+        throw DatabaseException("insert", "event", query.lastError().text().toStdString());
+    }
+
+    query.prepare("insert into db.attendance(idx, idx_person, idx_event, leader) "
+                  "select idx, idx_person, idx_event, leader from attendance where idx_event in " + idx + ";");
+    if(!query.exec())
+    {
+        throw DatabaseException("insert", "attendace", query.lastError().text().toStdString());
+    }
+
     _db.close();
 }

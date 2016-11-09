@@ -20,20 +20,30 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QSqlDatabase::addDatabase("QSQLITE");
 
-    connect(ui->settings, SIGNAL(new_person()), ui->main_widget, SLOT(new_person()));
-    connect(ui->settings, SIGNAL(new_event()), ui->main_widget, SLOT(new_event()));
-    connect(ui->settings, SIGNAL(new_mail_filter()), ui->main_widget, SLOT(new_mail_filter()));
+    connect(ui->settings, SIGNAL(new_person()), this, SLOT(emit_new_person()));
+    connect(ui->settings, SIGNAL(new_event()), this, SLOT(emit_new_event()));
+
+    connect(this, SIGNAL(new_person()), ui->main_widget, SLOT(new_person()));
+    connect(this, SIGNAL(new_event()), ui->main_widget, SLOT(new_event()));
+    connect(this, SIGNAL(new_filter()), ui->main_widget, SLOT(new_mail_filter()));
+
+    connect(ui->settings, SIGNAL(new_mail_filter()), this, SLOT(emit_new_filter()));
+
     connect(ui->settings, SIGNAL(new_database()), this, SLOT(new_database()));
     connect(ui->settings, SIGNAL(open_database()), this, SLOT(open_database()));
+
     connect(ui->settings, SIGNAL(open_person()), this, SLOT(emit_open_person()));
     connect(ui->settings, SIGNAL(open_event()), this, SLOT(emit_open_event()));
+
     connect(this, SIGNAL(open_person(PersonEntity)), ui->main_widget, SLOT(open_person(PersonEntity)));
     connect(this, SIGNAL(open_event(EventEntity)), ui->main_widget, SLOT(open_event(EventEntity)));
+
     connect(ui->settings, SIGNAL(delete_person()), this, SLOT(delete_person()));
     connect(ui->settings, SIGNAL(delete_event()), this, SLOT(delete_event()));
     connect(ui->settings, SIGNAL(save_file()), this, SLOT(save()));
     connect(ui->settings, SIGNAL(save_file_as()), this, SLOT(save_as()));
     connect(ui->settings, SIGNAL(save_all()), this, SLOT(save_all()));
+    connect(ui->settings, SIGNAL(export_database()), this, SLOT(export_database()));
 
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_S), this, SLOT(save()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_S), this, SLOT(save_as()));
@@ -93,6 +103,7 @@ void MainWindow::new_database()
             ui->bottom_bar->display("Napaka pri povezavi na bazo " + QFileInfo(path).fileName() +"!", true);
             _connected &= false;
         }
+        ui->main_widget->database(_db);
     }
 }
 
@@ -123,6 +134,45 @@ void MainWindow::open_database()
         }
     }
     ui->main_widget->database(_db);
+}
+
+void MainWindow::emit_new_person()
+{
+    if(_connected)
+    {
+        emit new_person();
+    }
+    else
+    {
+        MessageDialog message("Niste povezani na bazo!");
+        message.exec();
+    }
+}
+
+void MainWindow::emit_new_event()
+{
+    if(_connected)
+    {
+        emit new_event();
+    }
+    else
+    {
+        MessageDialog message("Niste povezani na bazo!");
+        message.exec();
+    }
+}
+
+void MainWindow::emit_new_filter()
+{
+    if(_connected)
+    {
+        emit new_filter();
+    }
+    else
+    {
+        MessageDialog message("Niste povezani na bazo!");
+        message.exec();
+    }
 }
 
 void MainWindow::save()
@@ -238,6 +288,59 @@ void MainWindow::delete_event()
             for(auto it=selected.begin(); it!=selected.end(); ++it)
             {
                 _db->delete_event(*it);
+            }
+        }
+        event_dialog->deleteLater();
+    }
+    else
+    {
+        MessageDialog message("Niste povezani na bazo!");
+        message.exec();
+    }
+}
+
+
+void MainWindow::export_database()
+{
+    if(_connected)
+    {
+        OpenEventDialog* event_dialog = new OpenEventDialog(_db);
+        if(event_dialog->exec())
+        {
+            QString old_path = _db->path();
+            QFileDialog f(this);
+            f.setNameFilter("*.db");
+            f.setAcceptMode(QFileDialog::AcceptSave);
+            f.setViewMode(QFileDialog::Detail);
+            f.setFileMode(QFileDialog::AnyFile);
+            f.setDirectory(_config.last_path());
+            if(f.exec())
+            {
+                QString path = f.selectedFiles()[0];
+                if(!path.endsWith(".db")) path.append(".db");
+                if(path == old_path)
+                {
+                    MessageDialog d("Izbrano mesto za izvoz ni veljavno");
+                    d.exec();
+                    return;
+                }
+                if(QFile(path).exists())
+                {
+                    QFile(path).remove();
+                }
+                try
+                {
+                    Database db2(path, _logger);
+                    _config.last_path(db2.folder());
+                    _db.reset(new Database(old_path, _logger));
+                    _db->export_database(event_dialog->index(), path);
+                }
+                catch(const std::exception&)
+                {
+                    MessageDialog d("Napaka pri povezavi na bazo " + QFileInfo(path).fileName() +"!");
+                    d.exec();
+                    return;
+                }
             }
         }
     }

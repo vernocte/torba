@@ -37,7 +37,14 @@ public slots:
 private slots:
     void close_file(int index);
     void change_text(QString val);
+    void dirty(bool);
     void paintEvent(QPaintEvent *);
+
+    // cross update
+    void add_event(int idx, const EventBaseEntity& e, bool leader);
+    void remove_event(int person, int event);
+    void add_person(int event, const PersonBaseEntity p, bool leader);
+    void remove_person(int event, int person, bool leader);
 
 private:
     Ui::MainWidget *ui;

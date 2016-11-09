@@ -12,6 +12,7 @@ OpenEventDialog::OpenEventDialog(std::shared_ptr<Database> db, QWidget *parent) 
         _events.append(QString::number(events[i].idx()) + "\t" + events[i].name() + "\t" + events[i].type());
     }
     ui->event_list->addItems(_events);
+    if(!_events.empty()) ui->event_list->setCurrentRow(0);
 }
 
 OpenEventDialog::~OpenEventDialog()

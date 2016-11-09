@@ -21,6 +21,11 @@ private slots:
     void on_import_database_button_clicked();
     void on_export_database_button_clicked();
 
+signals:
+
+    void export_database();
+    void import_database();
+
 private:
 
     QPushButton* import_database_button;

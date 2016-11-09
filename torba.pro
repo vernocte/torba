@@ -40,7 +40,8 @@ SOURCES += main.cpp\
     gui/dialogs/messagedialog.cpp \
     gui/subwidgets/eventattendancewidget.cpp \
     gui/subwidgets/maintabwidget.cpp \
-    gui/dialogs/categorydialog.cpp
+    gui/dialogs/categorydialog.cpp \
+    gui/dialogs/choicedialog.cpp
 
 HEADERS  += \
     gui/mainwindow.hpp \
@@ -71,7 +72,8 @@ HEADERS  += \
     gui/subwidgets/eventattendancewidget.hpp \
     backend/exceptions/databaseexception.hpp \
     gui/subwidgets/maintabwidget.hpp \
-    gui/dialogs/categorydialog.hpp
+    gui/dialogs/categorydialog.hpp \
+    gui/dialogs/choicedialog.hpp
 
 FORMS    += gui/mainwindow.ui \
     gui/main_widget/mainwidget.ui \
@@ -85,10 +87,12 @@ FORMS    += gui/mainwindow.ui \
     gui/dialogs/openeventdialog.ui \
     gui/dialogs/messagedialog.ui \
     gui/subwidgets/eventattendancewidget.ui \
-    gui/dialogs/categorydialog.ui
+    gui/dialogs/categorydialog.ui \
+    gui/dialogs/choicedialog.ui
 
 RESOURCES += \
     resources/resources.qrc
 
 DISTFILES += \
-    README.md
+    README.md \
+    docs/design.txt

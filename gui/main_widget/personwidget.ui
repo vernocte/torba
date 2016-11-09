@@ -181,7 +181,8 @@ QComboBox::drop-down
        <property name="styleSheet">
         <string notr="true">color: white;
 background-color: rgb(40,40,40);
-padding-left: 6px;</string>
+padding-left: 6px;
+border: 2px solid rgb(113,10,6);</string>
        </property>
        <property name="placeholderText">
         <string>Ime</string>
@@ -217,7 +218,8 @@ padding-left: 6px;</string>
        <property name="styleSheet">
         <string notr="true">color: white;
 background-color: rgb(40,40,40);
-padding-left: 6px;</string>
+padding-left: 6px;
+border: 2px solid rgb(113,10,6);</string>
        </property>
        <property name="text">
         <string/>
@@ -881,6 +883,9 @@ background-color: rgb(40,40,40);</string>
            <property name="styleSheet">
             <string notr="true">background-color: rgb(60,60,60);</string>
            </property>
+           <property name="selectionMode">
+            <enum>QAbstractItemView::ExtendedSelection</enum>
+           </property>
           </widget>
          </item>
          <item>
@@ -1061,6 +1066,9 @@ background-color: rgb(40,40,40);</string>
            <property name="styleSheet">
             <string notr="true">background-color: rgb(60,60,60);</string>
            </property>
+           <property name="selectionMode">
+            <enum>QAbstractItemView::ExtendedSelection</enum>
+           </property>
           </widget>
          </item>
          <item>
@@ -1234,6 +1242,9 @@ background-color: rgb(40,40,40);</string>
          <property name="styleSheet">
           <string notr="true">background-color: rgb(60,60,60);</string>
          </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::ExtendedSelection</enum>
+         </property>
         </widget>
        </item>
        <item>
@@ -1353,10 +1364,27 @@ background-color: rgb(40,40,40);</string>
  <tabstops>
   <tabstop>sex_combobox</tabstop>
   <tabstop>name_edit</tabstop>
+  <tabstop>surname_edit</tabstop>
   <tabstop>street_edit</tabstop>
+  <tabstop>street_number_edit</tabstop>
+  <tabstop>postal_number_edit</tabstop>
   <tabstop>post_edit</tabstop>
+  <tabstop>country_edit</tabstop>
+  <tabstop>birth_date_edit</tabstop>
+  <tabstop>place_edit</tabstop>
+  <tabstop>phone_edit</tabstop>
+  <tabstop>mail_edit</tabstop>
+  <tabstop>comments_edit</tabstop>
+  <tabstop>family_button</tabstop>
+  <tabstop>family_list</tabstop>
+  <tabstop>add_family_button</tabstop>
+  <tabstop>remove_family_button</tabstop>
+  <tabstop>role_list</tabstop>
   <tabstop>add_category_button</tabstop>
   <tabstop>remove_category_button</tabstop>
+  <tabstop>events_list</tabstop>
+  <tabstop>add_event_button</tabstop>
+  <tabstop>remove_event_button</tabstop>
  </tabstops>
  <resources>
   <include location="../../resources/resources.qrc"/>

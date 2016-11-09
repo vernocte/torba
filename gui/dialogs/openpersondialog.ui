@@ -23,7 +23,13 @@ background-color: rgb(80,80,80);</string>
      <property name="minimumSize">
       <size>
        <width>0</width>
-       <height>64</height>
+       <height>48</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>48</height>
       </size>
      </property>
      <property name="text">
@@ -35,9 +41,28 @@ background-color: rgb(80,80,80);</string>
      </property>
      <property name="iconSize">
       <size>
-       <width>64</width>
-       <height>64</height>
+       <width>32</width>
+       <height>32</height>
       </size>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="3">
+    <widget class="QListWidget" name="person_list">
+     <property name="font">
+      <font>
+       <family>MS Shell Dlg 2</family>
+       <pointsize>12</pointsize>
+       <weight>50</weight>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color: rgb(60,60,60);
+color: white;</string>
+     </property>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::ExtendedSelection</enum>
      </property>
     </widget>
    </item>
@@ -46,7 +71,13 @@ background-color: rgb(80,80,80);</string>
      <property name="minimumSize">
       <size>
        <width>0</width>
-       <height>64</height>
+       <height>48</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>48</height>
       </size>
      </property>
      <property name="text">
@@ -58,53 +89,8 @@ background-color: rgb(80,80,80);</string>
      </property>
      <property name="iconSize">
       <size>
-       <width>64</width>
-       <height>64</height>
-      </size>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0" colspan="3">
-    <widget class="QListWidget" name="person_list">
-     <property name="font">
-      <font>
-       <pointsize>12</pointsize>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">background-color: rgb(60,60,60);
-color: white;</string>
-     </property>
-     <property name="selectionMode">
-      <enum>QAbstractItemView::MultiSelection</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="1">
-    <widget class="QPushButton" name="new_button">
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>64</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>64</height>
-      </size>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="icon">
-      <iconset resource="../../resources/resources.qrc">
-       <normaloff>:/icons/icons/add_person.png</normaloff>:/icons/icons/add_person.png</iconset>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>64</width>
-       <height>64</height>
+       <width>32</width>
+       <height>32</height>
       </size>
      </property>
     </widget>
@@ -134,6 +120,35 @@ color: white;</string>
      </property>
      <property name="text">
       <string/>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QPushButton" name="new_button">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>48</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>48</height>
+      </size>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../../resources/resources.qrc">
+       <normaloff>:/icons/icons/add_person.png</normaloff>:/icons/icons/add_person.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>32</width>
+       <height>32</height>
+      </size>
      </property>
     </widget>
    </item>

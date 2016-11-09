@@ -33,6 +33,8 @@ signals:
     void save_file();
     void save_file_as();
     void save_all();
+    void import_database();
+    void export_database();
 
 private slots:
 
@@ -56,6 +58,8 @@ private slots:
     void emit_save_file();
     void emit_save_file_as();
     void emit_save_all();
+    void emit_import_database();
+    void emit_export_database();
 
 private:
     Ui::Settings *ui;

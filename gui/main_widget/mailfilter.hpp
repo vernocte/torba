@@ -18,6 +18,9 @@ public:
     void save() override;
     void save_as() override;
     QColor color() override;
+    virtual QString type() override;
+    virtual int idx() override;
+    virtual bool dirty() override;
 
 private:
     Ui::MailFilter *ui;

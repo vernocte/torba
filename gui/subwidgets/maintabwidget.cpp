@@ -22,7 +22,7 @@ void  ColoredTabBar::paintEvent(QPaintEvent*)
 
             QBrush brush = QBrush(color);
             painter.fillRect(Rect, brush);
-
+            Rect.adjust(5,0,0,0);
             painter.setPen(QPen(QColor(Qt::black)));
             painter.drawText(Rect, Qt::AlignVCenter | Qt::AlignLeft,
                              tabText(i));

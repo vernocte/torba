@@ -14,6 +14,7 @@ OpenPersonDialog::OpenPersonDialog(std::shared_ptr<Database> &db, bool allow_new
         _persons.append(QString::number(_val[i].idx()) + " " + _val[i].name() + " " + _val[i].surname());
     }
     ui->person_list->addItems(_persons);
+    if(!_persons.empty()) ui->person_list->setCurrentRow(0);
 }
 
 OpenPersonDialog::~OpenPersonDialog()
