@@ -13,6 +13,7 @@ Settings::Settings(QWidget *parent) :
     ui->new_database_fav->hide();
     ui->person_settings_fav->hide();
     ui->save_widget_fav->hide();
+    ui->connection_settings_fav->hide();
 
     // connect favourite to regular
     connect(ui->event_settings, SIGNAL(favourite_changed(bool)), ui->event_settings_fav, SLOT(visible(bool)));
@@ -40,6 +41,12 @@ Settings::Settings(QWidget *parent) :
     connect(ui->save_widget_fav, SIGNAL(favourite_changed(bool)), ui->save_widget_fav, SLOT(visible(bool)));
     connect(ui->save_widget_fav, SIGNAL(favourite_changed(bool)), ui->save_widget_person, SLOT(favourite(bool)));
     connect(ui->save_widget_fav, SIGNAL(favourite_changed(bool)), ui->save_widget_event, SLOT(favourite(bool)));
+
+    connect(ui->connection_settings, SIGNAL(favourite_changed(bool)), ui->connection_settings_fav, SLOT(visible(bool)));
+    connect(ui->connection_settings_fav, SIGNAL(favourite_changed(bool)), ui->connection_settings_fav, SLOT(visible(bool)));
+    connect(ui->connection_settings_fav, SIGNAL(favourite_changed(bool)), ui->connection_settings, SLOT(favourite(bool)));
+    connect(ui->connection_settings, SIGNAL(autoconnect_changed(bool)), ui->connection_settings_fav, SLOT(autoconnect(bool)));
+    connect(ui->connection_settings_fav, SIGNAL(autoconnect_changed(bool)), ui->connection_settings, SLOT(autoconnect(bool)));
 
     // connect functionality
     connect(ui->person_settings, SIGNAL(new_person()), this, SLOT(emit_new_person()));
@@ -95,6 +102,11 @@ Settings::~Settings()
     delete ui;
 }
 
+bool Settings::autoconnect()
+{
+    return ui->connection_settings->autoconnect();
+}
+
 void Settings::set_favourites(Config& c)
 {
     ui->event_settings_fav->favourite(c.event_setting());
@@ -103,9 +115,12 @@ void Settings::set_favourites(Config& c)
     ui->new_database_fav->favourite(c.new_database());
     ui->person_settings_fav->favourite(c.person_settings());
     ui->save_widget_fav->favourite(c.save_widget());
+    ui->connection_settings_fav->favourite(c.connection_settings());
 
     ui->settings_stack->setVisible(c.settings_visible());
     ui->hide_button->setChecked(c.settings_visible());
+
+    ui->connection_settings->autoconnect(c.autoconnect());
 }
 
 void Settings::save_favourites(Config& c)
@@ -116,8 +131,11 @@ void Settings::save_favourites(Config& c)
     c.new_database(ui->new_database_fav->favourite());
     c.person_settings(ui->person_settings_fav->favourite());
     c.save_widget(ui->save_widget_fav->favourite());
+    c.connection_settings(ui->connection_settings_fav->favourite());
 
     c.settings_visible(ui->hide_button->isChecked());
+
+    c.autoconnect(ui->connection_settings->autoconnect());
 }
 
 void Settings::emit_new_person()

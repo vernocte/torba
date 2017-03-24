@@ -8,6 +8,7 @@
 
 #include "entities/personentity.hpp"
 #include "entities/evententity.hpp"
+#include "entities/filterentity.hpp"
 #include "logger.hpp"
 
 // # Database
@@ -31,6 +32,9 @@ private:
 
     // #### Create database
     void create_database();
+
+
+    std::vector<int>::iterator unique_elements(std::vector<int>::iterator first, std::vector<int>::iterator last);
 
 public:
 
@@ -116,7 +120,13 @@ public:
     */
     void add_category(const QString& category);
 
+    QStringList event_type_list();
+
     void export_database(const std::vector<int>& index, const QString& path);
+
+    std::vector<EventBaseEntity> events_between(const QDate& start, const QDate& end, const QString &event_type);
+
+    std::vector<PersonEntity> filter(const FilterEntity&filter);
 };
 
 #endif // DATABASE_HPP

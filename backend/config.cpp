@@ -228,3 +228,21 @@ QString Config::last_path()
 {
     return _data.value("last path").value<QString>();
 }
+
+void Config::autoconnect(bool val)
+{
+    _data.setValue("autoconnect", val);
+}
+bool Config::autoconnect()
+{
+    return _data.value("autoconnect").value<bool>();
+}
+
+void Config::connection_settings(const bool val)
+{
+    _data.setValue("connection settings", val);
+}
+bool Config::connection_settings()
+{
+    return _data.value("connection settings").value<bool>();
+}

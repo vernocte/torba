@@ -41,7 +41,11 @@ SOURCES += main.cpp\
     gui/subwidgets/eventattendancewidget.cpp \
     gui/subwidgets/maintabwidget.cpp \
     gui/dialogs/categorydialog.cpp \
-    gui/dialogs/choicedialog.cpp
+    gui/dialogs/choicedialog.cpp \
+    gui/settings/connectionsettings.cpp \
+    gui/main_widget/welcomescreen.cpp \
+    gui/dialogs/maillist.cpp \
+    gui/subwidgets/filtertablewidget.cpp
 
 HEADERS  += \
     gui/mainwindow.hpp \
@@ -73,7 +77,12 @@ HEADERS  += \
     backend/exceptions/databaseexception.hpp \
     gui/subwidgets/maintabwidget.hpp \
     gui/dialogs/categorydialog.hpp \
-    gui/dialogs/choicedialog.hpp
+    gui/dialogs/choicedialog.hpp \
+    gui/settings/connectionsettings.hpp \
+    gui/main_widget/welcomescreen.hpp \
+    backend/entities/filterentity.hpp \
+    gui/dialogs/maillist.hpp \
+    gui/subwidgets/filtertablewidget.hpp
 
 FORMS    += gui/mainwindow.ui \
     gui/main_widget/mainwidget.ui \
@@ -88,11 +97,14 @@ FORMS    += gui/mainwindow.ui \
     gui/dialogs/messagedialog.ui \
     gui/subwidgets/eventattendancewidget.ui \
     gui/dialogs/categorydialog.ui \
-    gui/dialogs/choicedialog.ui
+    gui/dialogs/choicedialog.ui \
+    gui/main_widget/welcomescreen.ui \
+    gui/dialogs/maillist.ui
 
 RESOURCES += \
     resources/resources.qrc
 
 DISTFILES += \
     README.md \
-    docs/design.txt
+    docs/design.txt \
+    docs/names.txt

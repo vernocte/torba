@@ -4,6 +4,7 @@
 
 #include <QDebug>
 #include <sstream>
+#include <algorithm>
 
 // ### Private functions
 
@@ -734,6 +735,23 @@ QString vec_to_string(const std::vector<int>& vec)
     return QString::fromStdString(ss.str());
 }
 
+QStringList Database::event_type_list()
+{
+    _db.open();
+    QSqlQuery query;
+    QStringList types;
+    if(!query.exec("select distinct type from event;"))
+    {
+        throw DatabaseException("select", "event type", query.lastError().text().toStdString());
+    }
+    while(query.next())
+    {
+        types.append(query.value(0).toString());
+    }
+    _db.close();
+    return types;
+}
+
 void Database::export_database(const std::vector<int>& index, const QString& path)
 {
     _db.open();
@@ -787,4 +805,143 @@ void Database::export_database(const std::vector<int>& index, const QString& pat
     }
 
     _db.close();
+}
+
+std::vector<EventBaseEntity> Database::events_between(const QDate& start, const QDate& end, const QString& event_type)
+{
+    _db.open();
+    QSqlQuery query;
+    std::vector<EventBaseEntity> events;
+    if(event_type!="")
+    {
+        query.prepare("select idx, name, type from event  where type = :type and idx in (select idx_event from event_data where idx_property = 1 and value > :start) "
+                      "and idx in (select idx_event from event_data where idx_property = 2 and value < :end)");
+        query.bindValue(":type", event_type);
+    }
+    else
+    {
+        query.prepare("select idx, name, type from event  where idx in (select idx_event from event_data where idx_property = 1 and value > :start) "
+                      "and idx in (select idx_event from event_data where idx_property = 2 and value < :end)");
+    }
+
+    query.bindValue(":start", start.toString("yyyy-MM-dd"));
+    query.bindValue(":end", end.toString("yyyy-MM-dd"));
+    if(!query.exec())
+    {
+        throw DatabaseException("select", "events between", query.lastError().text().toStdString());
+    }
+    while(query.next())
+    {
+        events.emplace_back(EventBaseEntity(query.value(0).toInt(), query.value(1).toString(), query.value(2).toString()));
+    }
+    _db.close();
+    return events;
+}
+
+std::vector<PersonEntity> Database::filter(const FilterEntity& filter)
+{
+    _db.open();
+    QSqlQuery query;
+
+    std::vector<int> person_idx;
+
+    // get all idxes
+    query.prepare("select idx from person");
+    if(!query.exec())
+    {
+        throw DatabaseException("select", "person", query.lastError().text().toStdString());
+    }
+    while(query.next())
+    {
+        person_idx.emplace_back(query.value(0).toInt());
+    }
+
+
+    // if event's used, filter out
+    if(filter.use_events())
+    {
+        if(filter.events().empty())
+        {
+            return std::vector<PersonEntity>();
+        }
+        else
+        {
+            query.prepare("select idx_person from attendance where idx_event in " + vec_to_string(filter.events()));
+            if(!query.exec())
+            {
+                throw DatabaseException("select", "person_data", query.lastError().text().toStdString());
+            }
+            while(query.next())
+            {
+                person_idx.emplace_back(query.value(0).toInt());
+            }
+        }
+    }
+
+    // if category selected, filter out
+    if(filter.use_category())
+    {
+        int role_idx = -1;
+        // get idx of category
+        query.prepare("select idx from role where value = :role");
+        query.bindValue(":role", filter.person_category());
+        if(!query.exec())
+        {
+            throw DatabaseException("select", "attendance", query.lastError().text().toStdString());
+        }
+        while(query.next())
+        {
+            role_idx = query.value(0).toInt();
+        }
+
+        query.prepare("select idx_person from person_data where idx_property = 12 and value = :role_idx and idx_person in " + vec_to_string(person_idx));
+        query.bindValue(":role_idx", role_idx);
+        if(!query.exec())
+        {
+            throw DatabaseException("select", "person_data", query.lastError().text().toStdString());
+        }
+        person_idx.clear();
+        while(query.next())
+        {
+            person_idx.emplace_back(query.value(0).toInt());
+        }
+    }
+
+    if(filter.use_birth())
+    {
+        query.prepare("select idx_person from person_data where idx_property = 1 and value > :birth_start and value < :birth_end and idx_person in " + vec_to_string(person_idx));
+        query.bindValue(":birth_start", filter.born_from().toString("yyyy-mm-dd"));
+        query.bindValue(":birth_end", filter.born_to().toString("yyyy-mm-dd"));
+        if(!query.exec())
+        {
+            throw DatabaseException("select", "person_data", query.lastError().text().toStdString());
+        }
+        person_idx.clear();
+        while(query.next())
+        {
+            person_idx.emplace_back(query.value(0).toInt());
+        }
+    }
+
+    person_idx.erase(unique_elements(person_idx.begin(), person_idx.end()), person_idx.end());
+
+    std::vector<PersonEntity> people;
+    for(int i : person_idx)
+    {
+        people.emplace_back(get_person(i));
+    }
+    return people;
+}
+
+
+std::vector<int>::iterator Database::unique_elements(std::vector<int>::iterator first, std::vector<int>::iterator last)
+{
+    while (first != last)
+    {
+        std::vector<int>::iterator next(first);
+        last = std::remove(++next, last, *first);
+        first = next;
+    }
+
+    return last;
 }

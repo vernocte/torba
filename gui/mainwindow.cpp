@@ -51,6 +51,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->bottom_bar->display("Ni povezave na bazo!", true);
 
     restore();
+
+    if(_config.autoconnect())
+    {
+        open_database(_config.last_path());
+    }
 }
 
 MainWindow::~MainWindow()
@@ -94,7 +99,7 @@ void MainWindow::new_database()
         {
             _connected &= false;
             _db.reset(new Database(path, _logger));
-            _config.last_path(_db->folder());
+            _config.last_path(_db->path());
             _connected |= true;
             ui->bottom_bar->display("Povezan z bazo " + QFileInfo(path).fileName() +"!", false);
         }
@@ -123,7 +128,7 @@ void MainWindow::open_database()
         {
             _connected &= false;
             _db.reset(new Database(path, _logger));
-            _config.last_path(_db->folder());
+            _config.last_path(_db->path());
             _connected |= true;
             ui->bottom_bar->display("Povezan z bazo " + QFileInfo(path).fileName() +"!", false);
         }
@@ -134,6 +139,27 @@ void MainWindow::open_database()
         }
     }
     ui->main_widget->database(_db);
+}
+
+void MainWindow::open_database(const QString& path)
+{
+    if(QFile(path).exists())
+    {
+        try
+        {
+            _connected &= false;
+            _db.reset(new Database(path, _logger));
+            _config.last_path(_db->path());
+            _connected |= true;
+            ui->bottom_bar->display("Povezan z bazo " + QFileInfo(path).fileName() +"!", false);
+        }
+        catch(const std::exception&)
+        {
+            ui->bottom_bar->display("Napaka pri povezavi na bazo " + QFileInfo(path).fileName() +"!", true);
+            _connected &= false;
+        }
+        ui->main_widget->database(_db);
+    }
 }
 
 void MainWindow::emit_new_person()
@@ -313,7 +339,7 @@ void MainWindow::export_database()
             f.setAcceptMode(QFileDialog::AcceptSave);
             f.setViewMode(QFileDialog::Detail);
             f.setFileMode(QFileDialog::AnyFile);
-            f.setDirectory(_config.last_path());
+            f.setDirectory(QFileInfo(_config.last_path()).absoluteDir());
             if(f.exec())
             {
                 QString path = f.selectedFiles()[0];

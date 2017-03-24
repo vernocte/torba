@@ -137,6 +137,10 @@ public:
     */
     bool settings_visible();
 
+
+    void connection_settings(const bool val);
+    bool connection_settings();
+
     /*
     #### set window position
 
@@ -179,8 +183,8 @@ public:
     */
     QString last_path();
 
-
-
+    void autoconnect(bool val);
+    bool autoconnect();
 
 };
 

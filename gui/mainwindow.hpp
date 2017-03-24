@@ -33,6 +33,7 @@ private slots:
     void restore();
     void new_database();
     void open_database();
+    void open_database(const QString& path);
     void save();
     void save_as();
     void save_all();

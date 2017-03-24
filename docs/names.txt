@@ -1,0 +1,25 @@
+# PERSON
+
+name
+surname
+birthday
+birthplace
+email
+street
+street_number
+post
+postal_number
+country
+phone
+sex
+comment
+role
+family
+
+# EVENT
+
+name
+type
+start_date
+end_date
+comment

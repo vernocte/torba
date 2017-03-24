@@ -19,6 +19,7 @@ public:
 public slots:
     void set_favourites(Config &c);
     void save_favourites(Config& c);
+    bool autoconnect();
 
 signals:
     void new_person();

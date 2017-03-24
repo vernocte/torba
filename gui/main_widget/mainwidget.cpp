@@ -3,6 +3,7 @@
 #include "personwidget.hpp"
 #include "eventwidget.hpp"
 #include "mailfilter.hpp"
+#include "welcomescreen.hpp"
 #include "../dialogs/choicedialog.hpp"
 
 #include <QPainter>
@@ -16,6 +17,8 @@ MainWidget::MainWidget(QWidget *parent) :
     ui->setupUi(this);
 
     connect(ui->main_widget,SIGNAL(tabCloseRequested(int)),this,SLOT(close_file(int)));
+
+    ui->main_widget->addTab(new WelcomeScreen(), "Dobrodošli!");
 }
 
 MainWidget::~MainWidget()
@@ -98,7 +101,7 @@ void MainWidget::new_mail_filter()
         }
     }
     QString index = (idx == 0) ? "" : " " + QString::number(idx);
-    MailFilter* mail_filter = new MailFilter();
+    MailFilter* mail_filter = new MailFilter(_db);
     ui->main_widget->addTab(mail_filter, "Filter" + index);
     ui->main_widget->setCurrentWidget(mail_filter);
 }
