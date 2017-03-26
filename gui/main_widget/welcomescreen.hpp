@@ -22,6 +22,7 @@ public:
     virtual QString type() override;
     virtual int idx() override;
     virtual bool dirty() override;
+    void paintEvent(QPaintEvent *);
 
 private:
     Ui::WelcomeScreen *ui;

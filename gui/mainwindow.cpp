@@ -44,6 +44,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->settings, SIGNAL(save_file_as()), this, SLOT(save_as()));
     connect(ui->settings, SIGNAL(save_all()), this, SLOT(save_all()));
     connect(ui->settings, SIGNAL(export_database()), this, SLOT(export_database()));
+    connect(ui->settings, SIGNAL(import_database()), this, SLOT(import_database()));
 
     new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_S), this, SLOT(save()));
     new QShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_S), this, SLOT(save_as()));
@@ -374,5 +375,28 @@ void MainWindow::export_database()
     {
         MessageDialog message("Niste povezani na bazo!");
         message.exec();
+    }
+}
+
+void MainWindow::import_database()
+{
+    QFileDialog f(this);
+    f.setNameFilter("*.db");
+    f.setAcceptMode(QFileDialog::AcceptSave);
+    f.setViewMode(QFileDialog::Detail);
+    f.setFileMode(QFileDialog::ExistingFile);
+    f.setDirectory(_config.last_path());
+    if(f.exec())
+    {
+        QString path = f.selectedFiles()[0];
+        if(path == _db->path())
+        {
+            MessageDialog message("Izberite bazo na katero trenutno niste povezani!");
+            message.exec();
+        }
+        else
+        {
+            /* do import here */
+        }
     }
 }

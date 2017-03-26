@@ -1,6 +1,8 @@
 #include "welcomescreen.hpp"
 #include "ui_welcomescreen.h"
 
+#include <QPainter>
+
 WelcomeScreen::WelcomeScreen(QWidget *parent) :
     EditorBase(parent),
     ui(new Ui::WelcomeScreen)
@@ -30,4 +32,12 @@ int WelcomeScreen::idx()
 bool WelcomeScreen::dirty()
 {
     return false;
+}
+
+void WelcomeScreen::paintEvent(QPaintEvent *)
+{
+    QStyleOption opt;
+    opt.init(this);
+    QPainter p(this);
+    style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
 }

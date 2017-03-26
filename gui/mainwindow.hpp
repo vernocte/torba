@@ -45,6 +45,7 @@ private slots:
     void delete_person();
     void delete_event();
     void export_database();
+    void import_database();
 
 private:
 

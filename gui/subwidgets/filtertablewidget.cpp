@@ -24,7 +24,7 @@ void FilterTableWidget::keyPressEvent(QKeyEvent* event)
                 text += '\n';
             } else {
                 // Next cell
-                text += ';';
+                text += '\t';
             }
             currentRow = cell.row();
             text += cell.data().toString();
