@@ -81,6 +81,7 @@ void EventWidget::save()
     e.type(ui->type_edit->text());
     e.start_date(ui->from_edit->date());
     e.end_date(ui->to_edit->date());
+    e.comment(ui->comments_edit->toPlainText());
     for(int i=0; i<ui->participants_list->count(); ++i)
     {
         PersonBaseEntity p;

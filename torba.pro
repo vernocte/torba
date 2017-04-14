@@ -45,7 +45,9 @@ SOURCES += main.cpp\
     gui/settings/connectionsettings.cpp \
     gui/main_widget/welcomescreen.cpp \
     gui/dialogs/maillist.cpp \
-    gui/subwidgets/filtertablewidget.cpp
+    gui/subwidgets/filtertablewidget.cpp \
+    gui/dialogs/mergepersondialog.cpp \
+    gui/dialogs/mergeeventdialog.cpp
 
 HEADERS  += \
     gui/mainwindow.hpp \
@@ -82,7 +84,9 @@ HEADERS  += \
     gui/main_widget/welcomescreen.hpp \
     backend/entities/filterentity.hpp \
     gui/dialogs/maillist.hpp \
-    gui/subwidgets/filtertablewidget.hpp
+    gui/subwidgets/filtertablewidget.hpp \
+    gui/dialogs/mergepersondialog.hpp \
+    gui/dialogs/mergeeventdialog.hpp
 
 FORMS    += gui/mainwindow.ui \
     gui/main_widget/mainwidget.ui \
@@ -99,7 +103,9 @@ FORMS    += gui/mainwindow.ui \
     gui/dialogs/categorydialog.ui \
     gui/dialogs/choicedialog.ui \
     gui/main_widget/welcomescreen.ui \
-    gui/dialogs/maillist.ui
+    gui/dialogs/maillist.ui \
+    gui/dialogs/mergepersondialog.ui \
+    gui/dialogs/mergeeventdialog.ui
 
 RESOURCES += \
     resources/resources.qrc

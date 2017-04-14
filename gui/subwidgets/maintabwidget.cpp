@@ -14,7 +14,6 @@ void  ColoredTabBar::paintEvent(QPaintEvent*)
         for(int i=0; i<count(); ++i)
         {
             QRect Rect = tabRect(i);
-            Rect.adjust(0, 0, 0, 0);
             QColor color = ((EditorBase*)(_parent->widget(i)))->color();
             if(i != currentIndex()) color = color.darker(130);
 

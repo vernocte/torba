@@ -44,11 +44,8 @@ private slots:
     void on_remove_leader_button_clicked();
     void on_add_leader_button_clicked();
     void dirty(bool val);
-
     void on_from_edit_dateChanged(const QDate &);
-
     void on_to_edit_dateChanged(const QDate &);
-
     void on_comments_edit_textChanged();
 
 private:

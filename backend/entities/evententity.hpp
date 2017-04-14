@@ -98,6 +98,15 @@ public:
     [returns]: reference to participants
     */
     std::vector<PersonBaseEntity> &participants();
+
+    friend bool operator==(const EventEntity& lhs, const EventEntity& rhs)
+    {
+        return (lhs._name == rhs._name) && (lhs._type == rhs._type) && (lhs._start_date == rhs._start_date) && (lhs._end_date == rhs._end_date) && (lhs._comment == rhs._comment);
+    }
+    friend bool operator!=(const EventEntity& lhs, const EventEntity& rhs)
+    {
+        return !operator==(lhs, rhs);
+    }
 };
 
 #endif // EVENTENTITY_HPP

@@ -187,10 +187,9 @@ int Database::insert_person(const PersonEntity &p)
         // get index
         if(!query.exec("SELECT last_insert_rowid();"))
         {
-            _logger->log("Error getting index of inserted person: " + query.lastError().text());
-            throw std::logic_error(query.lastError().text().toStdString());
+            throw DatabaseException("select", "idx", query.lastError().text().toStdString());
         }
-        while (query.next())
+        if (query.next())
         {
             idx = query.value(0).toInt();
         }
@@ -944,4 +943,249 @@ std::vector<int>::iterator Database::unique_elements(std::vector<int>::iterator 
     }
 
     return last;
+}
+
+std::map<int, int> Database::merge_roles(const QString &path)
+{
+    _db.open();
+    QSqlQuery query;
+    query.prepare("attach :path as db");
+    query.bindValue(":path", path);
+    if(!query.exec())
+    {
+        throw DatabaseException("attach", "db", query.lastError().text().toStdString());
+    }
+    query.prepare("select idx, value from db.role");
+    if(!query.exec())
+    {
+        throw DatabaseException("select", "db.role", query.lastError().text().toStdString());
+    }
+    std::map<int, int> roles;
+    while(query.next())
+    {
+        QString value = query.value(1).toString();
+        QSqlQuery query2;
+        query2.prepare("select idx from role where value = :value");
+        query2.bindValue(":value", value);
+        if(!query2.exec())
+        {
+            throw DatabaseException("select", "role", query.lastError().text().toStdString());
+        }
+        if(query2.next())
+        {
+            roles[query.value(0).toInt()] = query2.value(0).toInt();
+        }
+        else
+        {
+            // insert role
+            query2.prepare("insert into  role(value) values(:value);");
+            query2.bindValue(":value", value);
+            if(!query2.exec())
+            {
+                throw DatabaseException("insert", "role", query.lastError().text().toStdString());
+            }
+            // get index
+            if(!query2.exec("SELECT last_insert_rowid();"))
+            {
+                throw DatabaseException("select", "index",query.lastError().text().toStdString());
+            }
+            if(query2.next())
+            {
+                roles[query.value(0).toInt()] = query2.value(0).toInt();
+            }
+        }
+    }
+    _db.close();
+    return roles;
+}
+
+std::vector<EventEntity> Database::get_events(const QString& path)
+{
+    _db.open();
+    QSqlQuery query;
+    query.prepare("attach :path as db");
+    query.bindValue(":path", path);
+    if(!query.exec())
+    {
+        throw DatabaseException("attach", "db", query.lastError().text().toStdString());
+    }
+    std::vector<EventEntity> events;
+    if(!query.exec("select idx, name, type from db.event;"))
+    {
+        throw DatabaseException("select", "db.event", query.lastError().text().toStdString());
+    }
+    while(query.next())
+    {
+        EventEntity e;
+        e.idx(query.value(0).toInt());
+        e.name(query.value(1).toString());
+        e.type(query.value(2).toString());
+        events.emplace_back(e);
+    }
+    for(EventEntity& e : events)
+    {
+        query.prepare("select idx_property, value from db.event_data where idx_event = :idx");
+        query.bindValue(":idx", e.idx());
+        if(!query.exec())
+        {
+            throw DatabaseException("select", "db.event_data", query.lastError().text().toStdString());
+        }
+        while(query.next())
+        {
+            switch(query.value(0).toInt())
+            {
+            case 1:
+                e.start_date(query.value(1).toDate());
+            case 2:
+                e.end_date(query.value(1).toDate());
+            case 3:
+                e.comment(query.value(1).toString());
+            default:
+                break;
+            }
+        }
+    }
+
+    _db.close();
+    return events;
+}
+
+int Database::event_exists(const QString& name, const QString& type)
+{
+    int idx = -1;
+    _db.open();
+    QSqlQuery query;
+    query.prepare("select idx from event where name = :name and type = :type");
+    query.bindValue(":name", name);
+    query.bindValue(":type", type);
+    if(!query.exec())
+    {
+        throw DatabaseException("select idx", "event", query.lastError().text().toStdString());
+    }
+    if(query.next())
+    {
+        idx = query.value(0).toInt();
+    }
+    _db.close();
+    return idx;
+}
+
+int Database::person_exists(const QString& name, const QString& surname)
+{
+    int idx = -1;
+    _db.open();
+    QSqlQuery query;
+    query.prepare("select idx from person where name = :name and surname = :surname");
+    query.bindValue(":name", name);
+    query.bindValue(":surname", surname);
+    if(!query.exec())
+    {
+        throw DatabaseException("select idx", "person", query.lastError().text().toStdString());
+    }
+    if(query.next())
+    {
+        idx = query.value(0).toInt();
+    }
+    _db.close();
+    return idx;
+}
+
+std::vector<EventEntity> Database::get_persons(const QString& path)
+{
+    _db.open();
+    QSqlQuery query;
+    query.prepare("attach :path as db");
+    query.bindValue(":path", path);
+    if(!query.exec())
+    {
+        throw DatabaseException("attach", "db", query.lastError().text().toStdString());
+    }
+    std::vector<PersonEntity> persons;
+    if(!query.exec("select idx, name, surname from db.person;"))
+    {
+        throw DatabaseException("select", "db.event", query.lastError().text().toStdString());
+    }
+    while(query.next())
+    {
+        PersonEntity p;
+        p.idx(query.value(0).toInt());
+        p.name(query.value(1).toString());
+        p.surname(query.value(2).toString());
+        persons.emplace_back(e);
+    }
+    for(PersonEntity& p : persons)
+    {
+        // person_data
+
+        std::vector<int> role_idx;
+
+        query.prepare("select idx_property, value from db.person_data where idx_person = :idx;");
+        query.bindValue(":idx", p.idx());
+        if(!query.exec())
+        {
+            throw DatabaseException("select", "person_data", query.lastError().text().toStdString());
+        }
+        while (query.next())
+        {
+            switch (query.value(0).toInt())
+            {
+            case 1:
+                p.birthday(query.value(1).toDate());
+                break;
+            case 2:
+                p.birthplace(query.value(1).toString());
+                break;
+            case 3:
+                p.email(query.value(1).toString());
+                break;
+            case 4:
+                p.street(query.value(1).toString());
+                break;
+            case 5:
+                p.street_number(query.value(1).toString());
+                break;
+            case 6:
+                p.post(query.value(1).toString());
+                break;
+            case 7:
+                p.postal_number(query.value(1).toString().toInt());
+                break;
+            case 8:
+                p.country(query.value(1).toString());
+                break;
+            case 9:
+                p.phone(query.value(1).toString());
+                break;
+            case 10:
+                p.sex(query.value(1).toString() == "female");
+                break;
+            case 11:
+                p.comment(query.value(1).toString());
+                break;
+            case 12:
+                role_idx.emplace_back(query.value(1).toInt());
+                break;
+            default:
+                throw DatabaseException("select", "person_data", "Unrecognised index: " + query.value(0).toString().toStdString());
+            }
+        }
+
+        // roles
+        for(auto it=role_idx.begin(); it!=role_idx.end(); ++it)
+        {
+            query.prepare("select value from db.role where idx = :idx;");
+            query.bindValue(":idx", *it);
+            if(!query.exec())
+            {
+                throw DatabaseException("select", "role", query.lastError().text().toStdString());
+            }
+            while (query.next())
+            {
+                p.roles().emplace_back(query.value(0).toString());
+            }
+        }
+    }
+
+    _db.close();
+    return events;
 }

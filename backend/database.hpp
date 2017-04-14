@@ -127,6 +127,10 @@ public:
     std::vector<EventBaseEntity> events_between(const QDate& start, const QDate& end, const QString &event_type);
 
     std::vector<PersonEntity> filter(const FilterEntity&filter);
+
+    std::map<int, int> merge_roles(const QString& path);
+    std::vector<EventEntity> get_events(const QString& path);
+    int event_exists(const QString& name, const QString& type);
 };
 
 #endif // DATABASE_HPP

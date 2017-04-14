@@ -7,6 +7,7 @@
 #include "dialogs/openpersondialog.hpp"
 #include "dialogs/openeventdialog.hpp"
 #include "dialogs/messagedialog.hpp"
+#include "dialogs/mergeeventdialog.hpp"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -396,7 +397,45 @@ void MainWindow::import_database()
         }
         else
         {
-            /* do import here */
+            try
+            {
+                // for safety
+                QFile::copy(path, path+".bck");
+
+                // merge roles
+                std::map<int, int> role = _db->merge_roles(path);
+
+                std::map<int, int> event;
+
+                std::vector<EventEntity> events = _db->get_events(path);
+                for(EventEntity e : events)
+                {
+
+                    int idx = _db->event_exists(e.name(), e.type());
+                    if(_db->get_event(idx) == e)
+                    {
+                        event[e.idx()] = idx;
+                    }
+                    else if(idx!=-1)
+                    {
+                        MergeEventDialog dialog(_db->get_event(idx), e);
+                        dialog.exec();
+                        _db->save_event(dialog.get_event());
+                        event[e.idx()] = idx;
+                    }
+                    else
+                    {
+                        event[e.idx()] = _db->insert_event(e);
+                    }
+                }
+            }
+            catch(std::exception&)
+            {
+                QFile::copy(path+".bck", path);
+                MessageDialog msg("Napaka pri združevanju baz. Baza je vrnjena v prvotno stanje.");
+                msg.exec();
+            }
+            QFile(path+".bck").remove();
         }
     }
 }
